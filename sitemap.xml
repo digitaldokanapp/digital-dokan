@@ -1,28 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemap.org/schemas/sitemap/0.9">
+
+  <!-- Home Page -->
   <url>
-    <loc>https://digitaldokanapp.github.io/digital-dokan/</loc>
-    <lastmod>2026-09-10</lastmod>
-    <priority>1.00</priority>
+    <loc>https://digitaldokan.pk/index.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
   </url>
+
+  <!-- Features Page -->
   <url>
-    <loc>https://digitaldokanapp.github.io/digital-dokan/index.html</loc>
-    <lastmod>2026-09-10</lastmod>
-    <priority>1.00</priority>
+    <loc>https://digitaldokan.pk/features.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
+
+  <!-- Pricing Page -->
   <url>
-    <loc>https://digitaldokanapp.github.io/digital-dokan/about.html</loc>
-    <lastmod>2026-09-10</lastmod>
-    <priority>0.80</priority>
+    <loc>https://digitaldokan.pk/pricing.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
+
+  <!-- Compare Page -->
   <url>
-    <loc>https://digitaldokanapp.github.io/digital-dokan/contact.html</loc>
-    <lastmod>2026-09-10</lastmod>
-    <priority>0.80</priority>
+    <loc>https://digitaldokan.pk/compare.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
+
+  <!-- About Us Page -->
   <url>
-    <loc>https://digitaldokanapp.github.io/digital-dokan/mydokan2.html</loc>
-    <lastmod>2026-09-10</lastmod>
-    <priority>0.80</priority>
+    <loc>https://digitaldokan.pk/about.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
+
+  <!-- Contact Us Page -->
+  <url>
+    <loc>https://digitaldokan.pk/contact.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Custom App/Dashboard Entry Page -->
+  <url>
+    <loc>https://digitaldokan.pk/mydokan2.html</loc>
+    <lastmod>2026-09-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
 </urlset>
