@@ -16,6 +16,10 @@ rules_version = '2';
 //                                  MANUALLY in the Firebase console only.
 //                                  No client code can create these docs.
 //   paymentRequests/{id}        -> plan payment submissions for admin review
+//   khataLinks/{token}          -> DD-F11 "Mera Khata": public read-only khata
+//                                  snapshot for ONE customer of ONE shop. The
+//                                  unguessable token is the only key; written
+//                                  and deleted by that shop's owner only.
 //
 // Default posture: DENY EVERYTHING unless a rule below explicitly allows it.
 //
@@ -23,8 +27,10 @@ rules_version = '2';
 //  - Rules see only the requester's profile (role/shopId); fine-grained UI
 //    behaviour (hiding buttons for cashiers) is app-level — the rules here
 //    are the real enforcement, the UI is only a convenience.
-//  - Creating a staff member's Firebase Auth account cannot be done by
-//    rules; it needs the Admin SDK / a Cloud Function (Firebase stage).
+//  - DD-F11: staff Firebase Auth accounts are created by the shop owner from
+//    the app through a SECONDARY Firebase app instance (client SDK), so no
+//    Admin SDK / Cloud Function is involved; these rules only govern the
+//    users/{uid} profile docs that make those accounts shop members.
 //  - "Owner approves a payment -> planStatus becomes 'active'" is an ADMIN
 //    write (admins collection below) or a Cloud Function; shop users can
 //    never write plan/trial fields themselves.
@@ -63,28 +69,77 @@ service cloud.firestore {
 
     // ---------- users/{uid} : identity + shop membership ----------
     match /users/{userId} {
-      // Read your own profile only. Nobody can list other users.
-      allow get: if signedIn() && request.auth.uid == userId;
-      allow list: if false;
+      // Read: your own profile — plus, DD-F11, a shop OWNER may read the
+      // profile docs of members of their OWN shop (the Staff Logins list).
+      // Another shop's members stay invisible: the doc's shopId must equal
+      // the requester's own shopId, and the requester must be its owner.
+      allow get: if signedIn() && (request.auth.uid == userId
+        || (hasProfile() && myRole() == 'owner' && resource.data.shopId == myShop()));
+      // List: owners only, and only docs belonging to their own shop (the
+      // app queries with where('shopId','==', <own shopId>) — a cross-shop
+      // list still matches nothing the rules would release).
+      allow list: if signedIn() && hasProfile() && myRole() == 'owner'
+        && resource.data.shopId == myShop();
 
-      // Create: only for yourself, only as 'owner', and only pointing at a
-      // shop whose ownerUid is you (the signup flow creates shops/{shopId}
-      // first, then this doc — see ddSignUp in mydokan2.html). This stops a
-      // signed-up user from joining somebody else's shop by guessing its ID.
-      allow create: if signedIn()
-        && request.auth.uid == userId
-        && request.resource.data.role == 'owner'
-        && request.resource.data.shopId is string
-        && get(/databases/$(database)/documents/shops/$(request.resource.data.shopId)).data.ownerUid == request.auth.uid;
+      // Create — two paths, nothing else:
+      // (1) Sign-up: only for yourself, only as 'owner', and only pointing
+      //     at a shop whose ownerUid is you (the signup flow creates
+      //     shops/{shopId} first, then this doc — see ddSignUp). This stops
+      //     a signed-up user from joining somebody else's shop by guessing
+      //     its ID.
+      // (2) DD-F11 staff creation: a shop OWNER creates the profile doc for
+      //     a staff account they just created (secondary auth instance).
+      //     The doc must land in the OWNER's own shop, the role may only be
+      //     'manager' or 'cashier' (nobody can mint a second owner), and it
+      //     must carry createdBy = the owner's uid.
+      allow create: if signedIn() && (
+        (request.auth.uid == userId
+          && request.resource.data.role == 'owner'
+          && request.resource.data.shopId is string
+          && get(/databases/$(database)/documents/shops/$(request.resource.data.shopId)).data.ownerUid == request.auth.uid)
+        ||
+        (request.auth.uid != userId
+          && hasProfile() && myRole() == 'owner'
+          && request.resource.data.shopId == myShop()
+          && request.resource.data.role in ['manager', 'cashier']
+          && request.resource.data.createdBy == request.auth.uid)
+      );
 
-      // Update: you may edit your display fields, but never your shopId or
-      // your role — changing role/shop is staff management (owner/admin job,
-      // done via the staff-invite flow + Cloud Function, not self-service).
-      allow update: if signedIn()
-        && request.auth.uid == userId
-        && request.resource.data.shopId == resource.data.shopId
-        && request.resource.data.role == resource.data.role;
-      allow delete: if false;
+      // Update — two paths:
+      // (1) Self: you may edit your display fields, but never your shopId
+      //     or your role.
+      // (2) DD-F11 staff management: a shop OWNER may change the role (or
+      //     name) of a NON-OWNER member of their own shop. shopId can never
+      //     move, an owner doc can never be edited through this path, and
+      //     the new role can only be 'manager' or 'cashier' — so this path
+      //     cannot promote anyone to owner or pull a member from another
+      //     shop.
+      allow update: if signedIn() && (
+        (request.auth.uid == userId
+          && request.resource.data.shopId == resource.data.shopId
+          && request.resource.data.role == resource.data.role)
+        ||
+        (request.auth.uid != userId
+          && hasProfile() && myRole() == 'owner'
+          && resource.data.shopId == myShop()
+          && resource.data.role != 'owner'
+          && request.resource.data.shopId == resource.data.shopId
+          && request.resource.data.role in ['manager', 'cashier']
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['role', 'name', 'updatedAt']))
+      );
+
+      // Delete — DD-F11 staff removal: only a shop OWNER, only a NON-OWNER
+      // member doc of their OWN shop. The owner's own doc can never be
+      // deleted from a client, and nobody can delete across shops. (The
+      // Firebase Auth account itself is not deleted by this — with no
+      // profile doc, ddResolveShop finds no shop and the login opens
+      // nothing.)
+      allow delete: if signedIn()
+        && request.auth.uid != userId
+        && hasProfile() && myRole() == 'owner'
+        && resource.data.shopId == myShop()
+        && resource.data.role != 'owner';
     }
 
     // ---------- admins/{uid} : platform admin (Faiza) ----------
@@ -156,6 +211,37 @@ service cloud.firestore {
           || (isMember(shopId) && myRole() == 'manager')
           || isAdmin();
       }
+    }
+
+    // ---------- khataLinks/{token} : DD-F11 "Mera Khata" public snapshot --
+    // A customer opens khata.html?t=<token> with NO login; the token (24
+    // random base64url chars, generated in the app) is the only key, exactly
+    // like an unlisted link. The document holds ONLY that one customer's
+    // display name, balance and recent entries plus the shop's display name
+    // (and shopId/ownerUid, which these write rules check). Reading is
+    // single-document GET only — LISTING the collection is denied, so the
+    // tokens cannot be enumerated. Writes are confined to the owner of the
+    // shop the snapshot belongs to: create/update/delete all require the
+    // requester's own shop to match the document's shopId and the stored
+    // ownerUid to be the requester. Revoking in the app deletes the doc,
+    // after which the link reads as "no longer active".
+    match /khataLinks/{token} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if signedIn()
+        && hasProfile() && myRole() == 'owner'
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.shopId == myShop();
+      allow update: if signedIn()
+        && hasProfile() && myRole() == 'owner'
+        && resource.data.ownerUid == request.auth.uid
+        && resource.data.shopId == myShop()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.shopId == myShop();
+      allow delete: if signedIn()
+        && hasProfile() && myRole() == 'owner'
+        && resource.data.shopId == myShop()
+        && resource.data.ownerUid == request.auth.uid;
     }
 
     // ---------- paymentRequests/{id} : manual plan payment + receipt ----

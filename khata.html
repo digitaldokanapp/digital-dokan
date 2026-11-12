@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Mera Khata — Digital Dokan</title>
+<link rel="icon" type="image/webp" href="digital-dokan-icon.webp">
+<style>
+  :root{--green:#0e7a3d;--dark:#070c09;--ink:#14211a;--muted:#5c6f64;--line:#e2eae5;--red:#b3261e;--bg:#f4f7f5}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 14px 30px}
+  .wrap{width:100%;max-width:520px}
+  .shophead{text-align:center;padding:14px 8px 6px}
+  .shophead img{width:56px;height:56px;border-radius:14px;object-fit:contain}
+  .shopname{font-size:26px;font-weight:800;line-height:1.2;margin-top:8px;word-break:break-word}
+  .cust{color:var(--muted);font-size:15px;margin-top:3px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:14px;box-shadow:0 1px 3px rgba(7,12,9,.05)}
+  .bal-label{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center}
+  .bal-amount{font-size:36px;font-weight:800;text-align:center;margin-top:4px}
+  .bal-note{text-align:center;color:var(--muted);font-size:14px;margin-top:5px}
+  .due{color:var(--red)} .clear{color:var(--green)} .adv{color:#8a6d00}
+  .updated{text-align:center;color:var(--muted);font-size:12px;margin-top:10px}
+  h2{font-size:16px;margin:2px 0 10px}
+  .row{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .r-main{min-width:0}
+  .r-note{font-size:15px;font-weight:600;word-break:break-word}
+  .r-date{font-size:12px;color:var(--muted);margin-top:2px}
+  .r-amt{font-size:15px;font-weight:800;white-space:nowrap}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;margin-left:6px;vertical-align:2px}
+  .tag-credit{background:#fdecea;color:var(--red)} .tag-payment{background:#e6f4ec;color:var(--green)}
+  .empty,.msg{text-align:center;color:var(--muted);font-size:15px;padding:22px 10px;line-height:1.55}
+  .msg b{color:var(--ink)}
+  .readonly{margin-top:14px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
+  footer{margin-top:auto;padding-top:22px;text-align:center;color:var(--muted);font-size:12px}
+  footer b{color:var(--green)}
+  .spin{width:34px;height:34px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;margin:40px auto 10px;animation:sp 0.8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="shophead">
+    <img src="digital-dokan-icon.webp" alt="Digital Dokan" onerror="this.style.display='none'">
+    <div class="shopname" id="shopName">Mera Khata</div>
+    <div class="cust" id="custName"></div>
+  </div>
+
+  <div id="loading"><div class="spin"></div><div class="msg">Aap ka khata load ho raha hai…</div></div>
+
+  <div id="deadBox" style="display:none">
+    <div class="card"><div class="msg"><b>Ye link ab active nahi hai.</b><br>This khata link is no longer active. Agar aap ko apna khata dekhna hai, to dukaan se naya link mang lein.<br><br>Please ask the shop for a fresh link.</div></div>
+  </div>
+
+  <div id="errBox" style="display:none">
+    <div class="card"><div class="msg"><b>Khata load nahi ho saka.</b><br>Internet check karke page dobara kholein.<br>Could not load — please check your connection and reopen the link.</div></div>
+  </div>
+
+  <div id="main" style="display:none">
+    <div class="card">
+      <div class="bal-label" id="balLabel">Baqaya (Balance)</div>
+      <div class="bal-amount" id="balAmount">Rs 0</div>
+      <div class="bal-note" id="balNote"></div>
+      <div class="updated" id="updatedAt"></div>
+    </div>
+    <div class="card">
+      <h2>Khata Entries</h2>
+      <div id="entries"></div>
+      <div class="empty" id="noEntries" style="display:none">Abhi tak koi entry nahi hai.<br>No entries yet.</div>
+    </div>
+    <div class="readonly">Ye page sirf dekhne ke liye hai — yahan se koi tabdeeli nahi ho sakti.<br>This is a read-only view of your khata.</div>
+  </div>
+
+  <footer>Powered by <b>Digital Dokan</b></footer>
+</div>
+
+<script>
+/* DD-F11: Mera Khata public page. Reads ONE snapshot document (khataLinks/{token})
+   through the Firestore REST API — no SDK, no login, no app data. The token in the
+   link is the only key; the shop owner can revoke it at any time, after which this
+   page shows the "no longer active" message. */
+/* DD-F11-KHATA-PURE-BEGIN (URL + REST parsing — exercised by the Node check) */
+var DD_KHATA_PROJECT = 'digital-dokan-a669e';
+var DD_KHATA_API_KEY = 'AIzaSyDBcUnJxixOzo5fJEs02o4lSxuyiozSweg';
+function ddKhataDocUrl(token) {
+  return 'https://firestore.googleapis.com/v1/projects/' + DD_KHATA_PROJECT +
+    '/databases/(default)/documents/khataLinks/' + encodeURIComponent(token) +
+    '?key=' + DD_KHATA_API_KEY;
+}
+function ddFsValue(v) {
+  if (v == null) return null;
+  if (Object.prototype.hasOwnProperty.call(v, 'stringValue')) return v.stringValue;
+  if (Object.prototype.hasOwnProperty.call(v, 'integerValue')) return Number(v.integerValue);
+  if (Object.prototype.hasOwnProperty.call(v, 'doubleValue')) return Number(v.doubleValue);
+  if (Object.prototype.hasOwnProperty.call(v, 'booleanValue')) return !!v.booleanValue;
+  if (Object.prototype.hasOwnProperty.call(v, 'timestampValue')) return v.timestampValue;
+  if (Object.prototype.hasOwnProperty.call(v, 'nullValue')) return null;
+  if (v.arrayValue) return (v.arrayValue.values || []).map(ddFsValue);
+  if (v.mapValue) {
+    var out = {}, f = v.mapValue.fields || {};
+    for (var k in f) out[k] = ddFsValue(f[k]);
+    return out;
+  }
+  return null;
+}
+function ddKhataParseDoc(json) {
+  if (!json || !json.fields) return null;
+  var f = {}, raw = json.fields;
+  for (var k in raw) f[k] = ddFsValue(raw[k]);
+  return {
+    shopName: String(f.shopName || ''),
+    customerName: String(f.customerName || ''),
+    balance: Number(f.balance || 0),
+    entries: Array.isArray(f.entries) ? f.entries : [],
+    updatedAt: Number(f.updatedAt || 0)
+  };
+}
+/* DD-F11-KHATA-PURE-END */
+
+function el(id) { return document.getElementById(id); }
+function show(id) {
+  ['loading', 'deadBox', 'errBox', 'main'].forEach(function (x) { el(x).style.display = (x === id) ? '' : 'none'; });
+}
+function fmtRs(n) { return 'Rs ' + Number(n || 0).toLocaleString('en-PK'); }
+function fmtDate(iso) {
+  var d = new Date(iso);
+  return isNaN(d) ? '' : d.toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+function render(data) {
+  el('shopName').textContent = data.shopName || 'Mera Khata';
+  el('custName').textContent = data.customerName ? ('Khata of ' + data.customerName) : '';
+  document.title = (data.shopName || 'Mera Khata') + ' — Khata';
+  var amt = el('balAmount'), note = el('balNote');
+  if (data.balance > 0) {
+    amt.textContent = fmtRs(data.balance); amt.className = 'bal-amount due';
+    el('balLabel').textContent = 'Baqaya — Lene Hain (Due)';
+    note.textContent = 'Ye raqam aap ne ' + (data.shopName || 'dukaan') + ' ko deni hai.';
+  } else if (data.balance < 0) {
+    amt.textContent = fmtRs(-data.balance); amt.className = 'bal-amount adv';
+    el('balLabel').textContent = 'Advance — Dukaan Ke Paas';
+    note.textContent = 'Ye raqam dukaan ke paas aap ki advance hai.';
+  } else {
+    amt.textContent = 'Rs 0'; amt.className = 'bal-amount clear';
+    el('balLabel').textContent = 'Khata Clear';
+    note.textContent = 'Koi baqaya nahi — aap ka khata clear hai. Shukriya!';
+  }
+  if (data.updatedAt) {
+    var u = new Date(data.updatedAt);
+    if (!isNaN(u)) el('updatedAt').textContent = 'Updated: ' + u.toLocaleDateString('en-PK', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + u.toLocaleTimeString('en-PK', { hour: 'numeric', minute: '2-digit' });
+  }
+  var box = el('entries');
+  box.innerHTML = '';
+  el('noEntries').style.display = data.entries.length ? 'none' : '';
+  data.entries.forEach(function (e) {
+    var row = document.createElement('div'); row.className = 'row';
+    var main = document.createElement('div'); main.className = 'r-main';
+    var noteEl = document.createElement('div'); noteEl.className = 'r-note';
+    noteEl.textContent = e.note || (e.type === 'credit' ? 'Udhaar' : 'Payment');
+    var tag = document.createElement('span');
+    tag.className = 'tag ' + (e.type === 'credit' ? 'tag-credit' : 'tag-payment');
+    tag.textContent = e.type === 'credit' ? 'Udhaar' : 'Payment';
+    noteEl.appendChild(tag);
+    var dt = document.createElement('div'); dt.className = 'r-date'; dt.textContent = fmtDate(e.date);
+    main.appendChild(noteEl); main.appendChild(dt);
+    var a = document.createElement('div'); a.className = 'r-amt ' + (e.type === 'credit' ? 'due' : 'clear');
+    a.textContent = (e.type === 'credit' ? '+ ' : '− ') + fmtRs(e.amount);
+    row.appendChild(main); row.appendChild(a);
+    box.appendChild(row);
+  });
+  show('main');
+}
+
+(function () {
+  var token = new URLSearchParams(location.search).get('t');
+  if (!token) { show('deadBox'); return; }
+  fetch(ddKhataDocUrl(token)).then(function (r) {
+    if (r.status === 404) { show('deadBox'); return null; }
+    if (!r.ok) { show('errBox'); return null; }
+    return r.json();
+  }).then(function (json) {
+    if (!json) return;
+    var data = ddKhataParseDoc(json);
+    if (!data) { show('deadBox'); return; }
+    render(data);
+  }).catch(function () { show('errBox'); });
+})();
+</script>
+</body>
+</html>
