@@ -3833,10 +3833,7 @@
                 const sales = salesToday.reduce( (a, s) => a + ddNetTotal(s), 0) /* DD-F8: returns net against the original sale */
                   , paid = salesToday.reduce( (a, s) => a + ddNetPaid(s), 0)
                   , due = salesToday.reduce( (a, s) => a + ddNetDue(s), 0);
-                const cogs = salesToday.reduce( (a, s) => a + s.items.reduce( (x, i) => {
-                    const p = db.products.find(p => p.id === i.productId);
-                    return x + num(i.cost) * ddLineNetQty(i) /* DD-F8: returned units carry no cost of goods */
-                }
+                const cogs = salesToday.reduce( (a, s) => a + s.items.reduce( (x, i) => x + ddLineCost(i, db.products) * ddLineNetQty(i) /* DD-F8: returned units carry no cost of goods · DD-ESTPROFIT: cost basis = F9's ddLineCost (line snapshot first, else the product's current buy) so this tile and the Munafa card can never disagree */
                 , 0), 0);
                 const exp = db.expenses.filter(e => sameDay(e.date, today)).reduce( (a, e) => a + e.amount, 0)
                   , profit = sales - cogs - exp;
@@ -4804,10 +4801,7 @@
                 const total = sales.reduce( (a, s) => a + ddNetTotal(s), 0) /* DD-F8: all report figures net of returns */
                   , paid = sales.reduce( (a, s) => a + ddNetPaid(s), 0)
                   , due = sales.reduce( (a, s) => a + ddNetDue(s), 0);
-                const cogs = sales.reduce( (a, s) => a + s.items.reduce( (x, i) => {
-                    const p = db.products.find(p => p.id === i.productId);
-                    return x + num(i.cost) * ddLineNetQty(i)
-                }
+                const cogs = sales.reduce( (a, s) => a + s.items.reduce( (x, i) => x + ddLineCost(i, db.products) * ddLineNetQty(i) /* DD-ESTPROFIT: cost basis = F9's ddLineCost (line snapshot first, else the product's current buy) so this tile and the Munafa card can never disagree */
                 , 0), 0);
                 const exp = db.expenses.filter(e => (!from || e.date.slice(0, 10) >= from) && (!to || e.date.slice(0, 10) <= to)).reduce( (a, e) => a + e.amount, 0);
                 const profit = total - cogs - exp;
@@ -6313,7 +6307,7 @@
             }
             function ddExpired(s){const t=Date.parse(s?.expiry_date||'');return Number.isFinite(t)&&Date.now()>t}
             function ddTrialLimit(s){/* DD-FIX (Stage B-1): owner decision — the SITE is the spec: the trial limits ITEMS (products) at 50, not invoices. */ return s?.plan_type==='7_days_trial'&&ddActiveProducts().length>=50}
-            function verifySubscriptionAccess(forSale=false){const s=ddGetSub();s.invoice_count=Math.max(Number(s.invoice_count||0),Array.isArray(db.sales)?db.sales.length:0);const blocked=ddExpired(s)||ddTrialLimit(s);if(blocked){showSubscriptionLock(ddTrialLimit(s)?'Trial item limit reached':'Your Subscription/Trial has expired');return false}localStorage.setItem(DD_SUB_KEY,JSON.stringify(s));return true}
+            function verifySubscriptionAccess(forSale=false){if(window.DD_TRIAL_PENDING)ddReResolveServerTrial(); /* DD-TRIALHARDEN (a): server trial state is still outstanding for this session — kick a re-resolve (self-guarded + throttled inside ddReResolveServerTrial, fire-and-forget); THIS call still answers from the current local state, and the re-resolve re-verifies the moment the server doc lands */ const s=ddGetSub();s.invoice_count=Math.max(Number(s.invoice_count||0),Array.isArray(db.sales)?db.sales.length:0);const blocked=ddExpired(s)||ddTrialLimit(s);if(blocked){showSubscriptionLock(ddTrialLimit(s)?'Trial item limit reached':'Your Subscription/Trial has expired');return false}localStorage.setItem(DD_SUB_KEY,JSON.stringify(s));return true}
             function showSubscriptionLock(reason){const e=document.getElementById('subscriptionLock');if(!e)return;document.getElementById('subscriptionLockTitle').textContent=reason==='Trial item limit reached'?'Trial item limit reached':'Your Subscription/Trial has expired';document.getElementById('subscriptionLockText').textContent='Your Subscription/Trial has expired or the trial limit of 50 items has been reached. Please contact support at +923257633875 to upgrade.';e.classList.add('show')}
             function hideSubscriptionLock(){document.getElementById('subscriptionLock')?.classList.remove('show')}
             function goToPricing(){window.location.href='./index.html#pricing'}
@@ -6495,7 +6489,7 @@
             /* DD-FIX: resolve the signed-in user's shopId + role from users/{uid} BEFORE any shop data loads.
                Result is kept in window.DD_SHOP_CTX and mirrored into db.cloud (tenantId/role) so later
                Stage B sync code reads data only under that shopId. Returns null when no profile exists. */
-            async function ddResolveShop(uid){window.DD_SHOP_CTX=null;ddCloudBlock(); /* DD-STAGEC (Bug 1): every sign-in path resolves the shop BEFORE ddCloudPull runs — voiding readiness from any earlier session in this tab here means nothing can push in the gap between sign-in and the pull completing */if(!uid||!window.DD_FB)return null;try{const snap=await window.DD_FB.getDoc(window.DD_FB.doc(window.DD_FB.fs,'users',uid));if(!snap.exists()){console.warn('DD-FIX: no users/{uid} profile for',uid);return null}const prof=snap.data();window.DD_SHOP_CTX={shopId:prof.shopId||'',role:prof.role||'cashier',name:prof.name||''};try{localStorage.setItem(DD_ACTIVE_SHOP_KEY,window.DD_SHOP_CTX.shopId)}catch(e){} /* DD-FIX (Stage B-1): remember the active shop so this device caches only this shop's data */ db.cloud.tenantId=window.DD_SHOP_CTX.shopId;db.cloud.role=window.DD_SHOP_CTX.role;try{const ssnap=await window.DD_FB.getDoc(window.DD_FB.doc(window.DD_FB.fs,'shops',window.DD_SHOP_CTX.shopId));if(ssnap.exists()){window.DD_SHOP_DOC=ssnap.data();ddApplyServerTrial(window.DD_SHOP_DOC)}}catch(e){console.warn('DD-FIX: shop doc load failed',e)}try{ddApplyRoleUI()}catch(e){} /* DD-F11: the role is now known — hide owner-only sections from staff before any data renders */ return window.DD_SHOP_CTX}catch(e){console.warn('DD-FIX: ddResolveShop failed',e);return null}}
+            async function ddResolveShop(uid){window.DD_SHOP_CTX=null;window.DD_SHOP_DOC=null; /* DD-TRIALHARDEN: a stale DD_SHOP_DOC left by an earlier session in this tab must never be re-applied for the shop now resolving — ddCloudPull re-applies it after the payload load (hardening (b) below), so it is re-fetched here or stays null */ ddCloudBlock(); /* DD-STAGEC (Bug 1): every sign-in path resolves the shop BEFORE ddCloudPull runs — voiding readiness from any earlier session in this tab here means nothing can push in the gap between sign-in and the pull completing */if(!uid||!window.DD_FB)return null;try{const snap=await window.DD_FB.getDoc(window.DD_FB.doc(window.DD_FB.fs,'users',uid));if(!snap.exists()){console.warn('DD-FIX: no users/{uid} profile for',uid);return null}const prof=snap.data();window.DD_SHOP_CTX={shopId:prof.shopId||'',role:prof.role||'cashier',name:prof.name||''};try{localStorage.setItem(DD_ACTIVE_SHOP_KEY,window.DD_SHOP_CTX.shopId)}catch(e){} /* DD-FIX (Stage B-1): remember the active shop so this device caches only this shop's data */ db.cloud.tenantId=window.DD_SHOP_CTX.shopId;db.cloud.role=window.DD_SHOP_CTX.role;try{const __shopRead=await ddFetchShopDocServer(window.DD_SHOP_CTX.shopId); /* DD-TRIALHARDEN (a): SERVER-FIRST read (getDocFromServer) — the old default-source getDoc could serve this device's cached copy of the shop doc (persistence on), so an admin's console edit of trialEnd/planStatus might never enter the session, and its silent catch continued as if all was well */ if(__shopRead.snap&&__shopRead.snap.exists()){window.DD_SHOP_DOC=__shopRead.snap.data();ddApplyServerTrial(window.DD_SHOP_DOC)}if(__shopRead.serverOk){window.DD_TRIAL_PENDING=false}else{window.DD_TRIAL_PENDING=true;setTimeout(()=>{try{ddReResolveServerTrial()}catch(e){}},5000)} /* DD-TRIALHARDEN (a): the server could not be consulted — whatever was applied (a cache copy, or nothing) is PROVISIONAL: mark it pending; one delayed retry is scheduled here, and ddReResolveServerTrial also fires on the 'online' event and on the next verifySubscriptionAccess call */ }catch(e){console.warn('DD-FIX: shop doc load failed',e);window.DD_TRIAL_PENDING=true;setTimeout(()=>{try{ddReResolveServerTrial()}catch(e){}},5000)}try{ddApplyRoleUI()}catch(e){} /* DD-F11: the role is now known — hide owner-only sections from staff before any data renders */ return window.DD_SHOP_CTX}catch(e){console.warn('DD-FIX: ddResolveShop failed',e);return null}}
             /* DD-FIX: Server-side trial/subscription state (owner spec: signup -> 7-day free trial -> subscription).
                ddApplyServerTrial mirrors shops/{shopId} trial fields into the local subscription object so the
                EXISTING countdown pill (updateSubscriptionUI) and lock (verifySubscriptionAccess/showSubscriptionLock)
@@ -6507,6 +6501,65 @@
                verifySubscriptionAccess(true)); the records stay readable behind the lock message.
                When Firebase is not configured this function is never called and the local demo flow is unchanged. */
             function ddApplyServerTrial(shop){if(!shop)return;const sub=ddGetSub();const endMs=Number(shop.trialEnd||0)||(shop.trialStartMs?Number(shop.trialStartMs)+7*86400000:0);if(shop.trialStartMs)sub.trial_start=Number(shop.trialStartMs);if(shop.planStatus==='active'&&shop.planExpiry){sub.expiry_date=new Date(Number(shop.planExpiry)).toISOString();sub.plan_type=shop.planPaid==='yearly'?'yearly_package':'monthly_package'}else if(endMs){sub.expiry_date=new Date(endMs).toISOString();sub.plan_type='7_days_trial'}if(shop.planStatus==='expired'){sub.expiry_date=new Date(Date.now()-1000).toISOString()}db.subscription=sub;try{localStorage.setItem(DD_SUB_KEY,JSON.stringify(sub))}catch(e){}updateSubscriptionUI();const pill=document.getElementById('trialPill');if(pill&&shop.planStatus!=='active'){const left=Math.ceil((endMs-Date.now())/86400000);if(left<=2&&left>0){pill.style.background='#92400e';pill.textContent='Free Trial \u2022 '+left+' day'+(left===1?'':'s')+' left \u2014 subscribe soon to avoid a pause'}else if(left<=0){pill.style.background='#7f1d1d'}}}
+            /* ================= DD-TRIALHARDEN: server trial/plan state must reach the gate =================
+               Live failure (Round 3, TEST Shop B): an admin set shops/{shopId}.trialEnd to a PAST date
+               in the Firebase console (verified saved server-side, same int64 type), the app was fully
+               signed out and freshly signed in — and it still showed the OLD expiry ("Expiry:
+               19/11/2026 • Free Trial • 7 days left • Status Active"), no lock, entries unblocked.
+               Trace found TWO stacked causes:
+               (1) ddResolveShop read the shop doc with the DEFAULT source — with IndexedDB
+                   persistence on, that read can be served from this device's cache (the Stage-C
+                   report proved this exact mechanism for data/main), and the surrounding catch
+                   silently continued — so an edited doc might never enter the session at all.
+               (2) Even when the fresh doc WAS read and applied, ddCloudPull's load branch then
+                   replaced db.subscription with the PAYLOAD's own subscription block — a mirror of
+                   the shop doc as it was when an earlier session last saved — and
+                   ddHealSubscriptionIdentity installed that stale block into DD_SUB_KEY as well;
+                   ddGetSub's merge ({...db.subscription, ...saved}, written back to BOTH stores on
+                   every read) made the stale state unanimous before verifySubscriptionAccess ran.
+               Fixes (this block + marked lines in ddResolveShop / ddCloudPull /
+               verifySubscriptionAccess / the 'online' listener / signOutLocalSession):
+               (a) ddFetchShopDocServer reads the shop doc SERVER-FIRST (getDocFromServer, as
+                   Stage C did for data/main); the default read is only a fallback. When the
+                   server could not be consulted, window.DD_TRIAL_PENDING marks the session's
+                   trial state PROVISIONAL and ddReResolveServerTrial retries (one delayed retry
+                   from ddResolveShop, on every 'online' event, on the next
+                   verifySubscriptionAccess call).
+               (b) ddCloudPull re-applies ddApplyServerTrial(window.DD_SHOP_DOC) AFTER the payload
+                   load + identity heal, so the server doc wins over the payload mirror for the
+                   rest of the session — and the pull's own saveDB then pushes the corrected
+                   block back, healing the payload itself for future sessions.
+               (c) ddReResolveServerTrial ends with updateSubscriptionUI + verifySubscriptionAccess,
+                   so the moment server truth lands the gate applies — including locking an app
+                   that was provisionally unlocked from cache.
+               Untouched by design: trial math, plan mapping, the lock UI, the payment flow, the
+               Stage-C readiness machine, Hotfix-3 heal semantics. This block only decides WHICH
+               subscription state those mechanisms see. */
+            window.DD_TRIAL_PENDING=false;
+            async function ddFetchShopDocServer(shopId){
+                const ref=window.DD_FB.doc(window.DD_FB.fs,'shops',shopId);
+                try{const snap=await window.DD_FB.getDocFromServer(ref);return{snap:snap,serverOk:true}}
+                catch(serverErr){console.warn('DD-TRIALHARDEN: server shop-doc read failed — falling back to the default read; server trial state stays PENDING',serverErr)}
+                try{const snap=await window.DD_FB.getDoc(ref);return{snap:snap,serverOk:false}}
+                catch(e){console.warn('DD-TRIALHARDEN: default shop-doc read failed too',e);return{snap:null,serverOk:false}}
+            }
+            let __ddTrialReResolving=false,__ddTrialLastTry=0;
+            async function ddReResolveServerTrial(){
+                if(!window.DD_TRIAL_PENDING||__ddTrialReResolving)return;
+                const ctx=window.DD_SHOP_CTX,u=window.DD_FB&&window.DD_FB.auth&&window.DD_FB.auth.currentUser;
+                if(!ctx||!ctx.shopId||!u||!window.DD_FB)return;
+                const nowMs=Date.now();if(nowMs-__ddTrialLastTry<3000)return;__ddTrialLastTry=nowMs;__ddTrialReResolving=true;
+                try{
+                    const read=await ddFetchShopDocServer(ctx.shopId);
+                    if(read.serverOk){
+                        window.DD_TRIAL_PENDING=false;
+                        if(read.snap&&read.snap.exists()){window.DD_SHOP_DOC=read.snap.data();ddApplyServerTrial(window.DD_SHOP_DOC)}
+                        updateSubscriptionUI();verifySubscriptionAccess(false); /* DD-TRIALHARDEN (c): the gate re-runs on server truth the moment it lands */
+                    }
+                    /* server still unreachable: stay PENDING — the next 'online' event, verify call or scheduled retry tries again */
+                }catch(e){console.warn('DD-TRIALHARDEN: re-resolve failed',e)}
+                finally{__ddTrialReResolving=false}
+            }
             /* DD-HOTFIX3: fresh-subscription builder + installer. Root cause of the cross-shop
                subscription leak: the payload's subscription block is built from LOCAL state, and the
                local subscription cache (DD_SUB_KEY) is a single device-global key that sign-out never
@@ -6655,7 +6708,7 @@
                            (Hotfix-2 behaviour, unchanged) */
                     }
                     if(raw){
-                        db=mergeDB(JSON.parse(raw));db.cloud=ddCloudMeta();ddHealSubscriptionIdentity(); /* DD-HOTFIX3 (self-heal): if this stored payload's subscription names another shop's master (polluted before this fix), re-anchor it to the signed-in user now — the corrected block is what the next save pushes */ ddCloudReady(ctx.shopId); /* DD-STAGEC (Bug 1): pull completed from verified cloud state — readiness via the state machine (supersedes the direct DD-HOTFIX2 flag write) */ /* DD-HOTFIX2 (Bug 2): this shop's cloud state is now established in this session — pushes unlocked for this shop only */ saveDB();refresh();renderHR();renderBranches();updateSubscriptionUI();showToast('Cloud data loaded');return;
+                        db=mergeDB(JSON.parse(raw));db.cloud=ddCloudMeta();ddHealSubscriptionIdentity(); /* DD-HOTFIX3 (self-heal): if this stored payload's subscription names another shop's master (polluted before this fix), re-anchor it to the signed-in user now — the corrected block is what the next save pushes */ if(window.DD_SHOP_DOC)ddApplyServerTrial(window.DD_SHOP_DOC); /* DD-TRIALHARDEN (b): the mergeDB above replaced db.subscription with the PAYLOAD's subscription block — a mirror of the shop doc as it was when an earlier session last saved (e.g. the pre-edit trialEnd) — and the heal just re-installed that block into DD_SUB_KEY. Re-apply the SERVER trial state ddResolveShop fetched, AFTER the load + heal, so the shop doc wins over the payload mirror for the rest of this session; the saveDB below persists the corrected block and the next push heals the payload itself */ ddCloudReady(ctx.shopId); /* DD-STAGEC (Bug 1): pull completed from verified cloud state — readiness via the state machine (supersedes the direct DD-HOTFIX2 flag write) */ /* DD-HOTFIX2 (Bug 2): this shop's cloud state is now established in this session — pushes unlocked for this shop only */ saveDB();refresh();renderHR();renderBranches();updateSubscriptionUI();showToast('Cloud data loaded');return;
                     }
                     /* Empty cloud payload -> FIRST-LOGIN IMPORT (the "1-click data import" claim): offer the
                        device's pre-cloud data once per shop; if declined (or none exists), start clean. */
@@ -6663,7 +6716,7 @@
                     if(cand&&!localStorage.getItem(DD_IMPORT_KEY+ctx.shopId)){
                         const yes=confirm('We found your existing Digital Dokan data on this device (from before cloud accounts).\n\nImport it into your shop "'+(window.DD_SHOP_DOC?.shopName||'your shop')+'" now? This is a one-time import.');
                         localStorage.setItem(DD_IMPORT_KEY+ctx.shopId,(yes?'imported:':'declined:')+Date.now());
-                        if(yes){db=mergeDB(cand);db.cloud=ddCloudMeta();ddHealSubscriptionIdentity(); /* DD-HOTFIX3: an accepted import keeps the user's own subscription state (plan/dates/counters are legitimately theirs) — only the IDENTITY is guarded: if the blob names a different master, re-anchor master_uid/master_email to the signed-in user before the import push below */ ddCloudReady(ctx.shopId); /* DD-STAGEC (Bug 1): server-confirmed empty cloud + accepted import — readiness via the state machine */ /* DD-HOTFIX2 (Bug 2): import accepted — the imported blob is now this shop's established state, so the push below is allowed */ saveDB();await ddCloudPush();refresh();renderHR();renderBranches();updateSubscriptionUI();showToast('Your existing data was imported into your shop');return}
+                        if(yes){db=mergeDB(cand);db.cloud=ddCloudMeta();ddHealSubscriptionIdentity(); /* DD-HOTFIX3: an accepted import keeps the user's own subscription state (plan/dates/counters are legitimately theirs) — only the IDENTITY is guarded: if the blob names a different master, re-anchor master_uid/master_email to the signed-in user before the import push below */ ddCloudReady(ctx.shopId); /* DD-STAGEC (Bug 1): server-confirmed empty cloud + accepted import — readiness via the state machine */ /* DD-HOTFIX2 (Bug 2): import accepted — the imported blob is now this shop's established state, so the push below is allowed */ if(window.DD_SHOP_DOC)ddApplyServerTrial(window.DD_SHOP_DOC); /* DD-TRIALHARDEN (b): same server-wins rule as the load branch — an imported legacy blob's subscription block must not outrank this shop's server doc */ saveDB();await ddCloudPush();refresh();renderHR();renderBranches();updateSubscriptionUI();showToast('Your existing data was imported into your shop');return}
                     }
                     db=ddCleanWorkspace();ddInstallSubscription(ddFreshSubscription(window.DD_SHOP_DOC)); /* DD-HOTFIX3 (b): ddCleanWorkspace() copies db.subscription verbatim (L: clean.subscription=db.subscription) — on a browser that held a previous shop's session that block carries the OLD shop's master_uid/invoice_count (via the stale DD_SUB_KEY merge in ddGetSub). Replace it with a FRESH block for THIS shop (own uid/email, server trial dates from the shop doc, invoice_count 0) before the first push below */ ddCloudReady(ctx.shopId); /* DD-STAGEC (Bug 1): server-confirmed empty cloud — the clean workspace is this new shop's verified state, readiness via the state machine */ /* DD-HOTFIX2 (Bug 2): the CLEAN workspace is this new shop's established state — the push below writes it as the shop's FIRST payload (empty lists, invoice numbering from 1001), never the demo seed */ saveDB();await ddCloudPush();refresh();renderHR();renderBranches();updateSubscriptionUI();
                 }catch(e){console.warn(e);ddCloudBlock(); /* DD-STAGEC (Bug 1): a failed pull leaves the session BLOCKED — no push may follow until a pull completes */ showToast('Cloud data could not be loaded \u2014 showing this device\u2019s copy')}
@@ -7139,7 +7192,7 @@
                 try{if(window.DD_FB?.auth)await window.DD_FB.signOut(window.DD_FB.auth)}catch(e){}
                 if(shopId){try{localStorage.removeItem(ddCacheKey(shopId))}catch(e){}}
                 try{localStorage.removeItem(DD_ACTIVE_SHOP_KEY)}catch(e){}
-                window.DD_SHOP_CTX=null;window.DD_SHOP_DOC=null;ddCloudBlock(); /* DD-HOTFIX2 (Bug 2): the next sign-in on this device must re-establish its shop state via ddCloudPull before any push is allowed again */ try{ddApplyRoleUI()}catch(e){} /* DD-F11: signed out — restore full (single-user) section visibility for the next session */
+                window.DD_SHOP_CTX=null;window.DD_SHOP_DOC=null;window.DD_TRIAL_PENDING=false; /* DD-TRIALHARDEN (a): outstanding server-trial state belongs to the signed-out session */ ddCloudBlock(); /* DD-HOTFIX2 (Bug 2): the next sign-in on this device must re-establish its shop state via ddCloudPull before any push is allowed again */ try{ddApplyRoleUI()}catch(e){} /* DD-F11: signed out — restore full (single-user) section visibility for the next session */
                 sessionStorage.removeItem(DD_SESSION_KEY);localStorage.removeItem(DD_AUTH_KEY);
                 document.getElementById('subscriptionLock')?.classList.remove('show');
                 document.getElementById('ddLoginOverlay')?.classList.add('show');
@@ -7179,7 +7232,7 @@
             window.printInvoice=function(s){const sub=ddGetSub();let html=ddReceiptSize()==='a4'?invoiceHTML(s):ddThermalInvoiceHTML(s);/* DD-F4: thermal branch — A4 output unchanged */if(sub.plan_type==='7_days_trial')html=html.replace('</div>`','</div>');document.getElementById('printArea').innerHTML=html+(sub.plan_type==='7_days_trial'?'<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:.12;font-size:46px;font-weight:800;transform:rotate(-25deg);font-family:Arial">Digital Dokan - Free Trial</div>':'');window.print();document.getElementById('printArea').innerHTML=''};
             // Keep normal saves local-first and queue cloud writes after connectivity returns.
             const ddOriginalSaveDB=saveDB;saveDB=function(){ddOriginalSaveDB();if(window.DD_FB?.auth?.currentUser){clearTimeout(window.__ddSaveTimer);window.__ddSaveTimer=setTimeout(()=>ddCloudPush(),600)}};
-            window.addEventListener('online',()=>{if(window.DD_FB?.auth?.currentUser){const __ctx=window.DD_SHOP_CTX;if(__ctx?.shopId&&!ddCloudIsReady(__ctx.shopId)){ddCloudPull()}else{ddCloudPush()}}}); /* DD-STAGEC (Bug 1): on reconnect, a shop whose pull never completed (or failed server verification) RETRIES THE PULL instead of pushing blind; a ready shop keeps the original push-on-reconnect behaviour */
+            window.addEventListener('online',()=>{if(window.DD_FB?.auth?.currentUser){if(window.DD_TRIAL_PENDING)ddReResolveServerTrial(); /* DD-TRIALHARDEN (a): reconnect is a re-resolve trigger while server trial state is outstanding */ const __ctx=window.DD_SHOP_CTX;if(__ctx?.shopId&&!ddCloudIsReady(__ctx.shopId)){ddCloudPull()}else{ddCloudPush()}}}); /* DD-STAGEC (Bug 1): on reconnect, a shop whose pull never completed (or failed server verification) RETRIES THE PULL instead of pushing blind; a ready shop keeps the original push-on-reconnect behaviour */
             /* ===== DD-STAGEC (Item 3): POS PRICE AUTO-FILL ON PRODUCT SELECTION =====
                Typing/choosing a product in the POS Product box left the Price box
                blank until + Add (addCartLine fell back to the product's sale price
