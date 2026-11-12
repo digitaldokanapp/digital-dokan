@@ -3,15 +3,26 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Digital Dokan | Smart POS, Khata & Inventory Management Software in Pakistan</title>
-        <meta name="description" content="Digital Dokan helps Pakistani shops manage POS billing, Khata, Udhaar, stock, low-stock alerts, WhatsApp receipts and business records.">
+        <title>POS & Khata Software in Pakistan | Digital Dokan</title>
+        <meta name="description" content="Fast POS billing, digital udhaar khata, stock alerts and reports for Pakistani shops. Start your free 7-day trial — no card needed.">
         <meta name="robots" content="index, follow">
-        <link rel="canonical" href="./index.html">
-        <meta property="og:title" content="Digital Dokan | Smart POS, Khata & Inventory">
-        <meta property="og:description" content="Simple retail software for billing, Khata and stock management in Pakistan.">
+        <link rel="canonical" href="https://digitaldokanapp.github.io/digital-dokan/">
+        <link rel="icon" type="image/webp" href="./digital-dokan-icon.webp">
+        <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="./favicon-180.png">
+        <meta property="og:title" content="POS & Khata Software in Pakistan | Digital Dokan">
+        <meta property="og:description" content="Fast POS billing, digital udhaar khata, stock alerts and reports for Pakistani shops. Start your free 7-day trial — no card needed.">
         <meta property="og:type" content="website">
-        <meta property="og:url" content="./index.html">
+        <meta property="og:url" content="https://digitaldokanapp.github.io/digital-dokan/">
+        <meta property="og:site_name" content="Digital Dokan">
+        <meta property="og:image" content="https://digitaldokanapp.github.io/digital-dokan/og-cover.jpg">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Digital Dokan dashboard — POS billing, khata and stock for a Pakistani shop">
         <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="POS & Khata Software in Pakistan | Digital Dokan">
+        <meta name="twitter:description" content="Fast POS billing, digital udhaar khata, stock alerts and reports for Pakistani shops. Start your free 7-day trial — no card needed.">
+        <meta name="twitter:image" content="https://digitaldokanapp.github.io/digital-dokan/og-cover.jpg">
         <script src="https://unpkg.com/lucide@latest"></script>
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
@@ -961,20 +972,62 @@
                 "@graph": [
                     {
                         "@type": "Organization",
+                        "@id": "https://digitaldokanapp.github.io/digital-dokan/#organization",
                         "name": "Digital Dokan",
-                        "email": "dokanretailkhata@gmail.com"
+                        "url": "https://digitaldokanapp.github.io/digital-dokan/",
+                        "email": "dokanretailkhata@gmail.com",
+                        "logo": "https://digitaldokanapp.github.io/digital-dokan/digital-dokan-icon.webp"
+                    },
+                    {
+                        "@type": "WebSite",
+                        "@id": "https://digitaldokanapp.github.io/digital-dokan/#website",
+                        "name": "Digital Dokan",
+                        "url": "https://digitaldokanapp.github.io/digital-dokan/",
+                        "publisher": { "@id": "https://digitaldokanapp.github.io/digital-dokan/#organization" }
                     },
                     {
                         "@type": "SoftwareApplication",
                         "name": "Digital Dokan",
+                        "url": "https://digitaldokanapp.github.io/digital-dokan/",
                         "applicationCategory": "BusinessApplication",
                         "operatingSystem": "Web",
-                        "description": "POS, Khata and inventory management software for Pakistani retail businesses."
+                        "description": "POS billing, digital udhaar khata and inventory management software for Pakistani retail shops.",
+                        "offers": [
+                            { "@type": "Offer", "name": "7-Day Free Trial", "price": "0", "priceCurrency": "PKR" },
+                            { "@type": "Offer", "name": "Pro Monthly", "price": "3000", "priceCurrency": "PKR" },
+                            { "@type": "Offer", "name": "Pro Yearly", "price": "27000", "priceCurrency": "PKR" }
+                        ],
+                        "publisher": { "@id": "https://digitaldokanapp.github.io/digital-dokan/#organization" }
                     },
                     {
-                        "@type": "WebSite",
-                        "name": "Digital Dokan",
-                        "url": "./index.html"
+                        "@type": "FAQPage",
+                        "mainEntity": [
+                            {
+                                "@type": "Question",
+                                "name": "Can Digital Dokan manage customer Udhaar?",
+                                "acceptedAnswer": { "@type": "Answer", "text": "Yes. Customer Khata records can keep balances, payments and transaction history together." }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "Can I manage inventory and low-stock items?",
+                                "acceptedAnswer": { "@type": "Answer", "text": "Yes. Add stock, prices and thresholds so items needing attention are easier to find." }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How do I open the software?",
+                                "acceptedAnswer": { "@type": "Answer", "text": "Click any software button to open the actual Digital Dokan app." }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How do I pay with Easypaisa or JazzCash?",
+                                "acceptedAnswer": { "@type": "Answer", "text": "Choose Monthly or Yearly, send payment to the Easypaisa/NayaPay or JazzCash details shown in the payment modal, then email your receipt screenshot to dokanretailkhata@gmail.com." }
+                            },
+                            {
+                                "@type": "Question",
+                                "name": "How do I create an account and what is free for 7 days?",
+                                "acceptedAnswer": { "@type": "Answer", "text": "Use Book a Demo to request the 7-day trial or a paid plan through WhatsApp. The 7-day trial includes POS Billing, Customer Khata, up to 50 items and basic sales tracking." }
+                            }
+                        ]
                     }
                 ]
             }</script>
@@ -1462,7 +1515,7 @@
         <header>
             <div class="wrap nav">
                 <a class="brand" href="./index.html">
-                    <img class="mark" src="./digital-dokan-icon.webp" alt="Digital Dokan logo">
+                    <img class="mark" src="./digital-dokan-icon.webp" alt="Digital Dokan logo" width="768" height="768">
                     <span>
                         Digital Dokan<small>Smart POS • Khata • Inventory</small>
                     </span>
@@ -1494,13 +1547,13 @@
                             <h1>Best POS System & Udhaar Khata Software in Pakistan</h1>
                             <p class="muted">Manage fast POS billing, digital Udhaar Khata, inventory alerts, and expense reports in one simple workspace. Works offline and sends WhatsApp receipts instantly.</p>
                             <div class="actions">
-                                <button class="btn btn-green" onclick="openDemo()">Start Free Trial</button>
+                                <button class="btn btn-green" onclick="window.location.href='./mydokan2.html'">Start Free Trial</button>
                                 <button class="btn btn-outline" onclick="openDemo()">Book a Demo</button>
                             </div>
                             <div class="muted hero-proof">✓ No credit card required · Works offline · Instant 2-min setup</div>
                         </div>
                         <figure>
-                            <img src="./dashboard-hero-attached.png" alt="Digital Dokan dashboard with sidebar, sales metrics, chart and business snapshot">
+                            <img src="./dashboard-hero-attached.png" alt="Digital Dokan dashboard with sidebar, sales metrics, chart and business snapshot" width="1351" height="639">
                             <figcaption class="sr-only">Digital Dokan dashboard preview with navigation, sales metrics and business snapshot.</figcaption>
                         </figure>
                     </div>
@@ -1573,11 +1626,11 @@
                     </div>
                     <div class="gallery" style="margin-top:50px">
                         <figure class="feature-preview">
-                            <img src="./quick-billing-attached.png" alt="Digital Dokan Quick Billing POS with customer Khata snapshot" loading="lazy">
+                            <img src="./quick-billing-attached.png" alt="Digital Dokan Quick Billing POS with customer Khata snapshot" loading="lazy" width="1354" height="641">
                             <figcaption class="sr-only">Quick Billing and POS preview with customer Khata snapshot.</figcaption>
                         </figure>
                         <figure class="feature-preview invoice-preview">
-                            <img src="./sales-invoices-latest.png" alt="Digital Dokan sales and invoices table" loading="lazy">
+                            <img src="./sales-invoices-latest.png" alt="Digital Dokan sales and invoices table" loading="lazy" width="1350" height="637">
                             <figcaption class="sr-only">Sales and invoices table with date, invoice, customer, total and actions.</figcaption>
                         </figure>
                     </div>
@@ -1639,7 +1692,7 @@
                         <p class="text-gray-300 text-base md:text-lg leading-relaxed mb-6">Track profit margins, inventory thresholds, expenses, Khata, sales history, reports and thermal printing from one place.</p>
                     </div>
                     <figure class="guide-preview">
-                        <img src="./business-reports-attached.png" alt="Digital Dokan business reports preview" loading="lazy">
+                        <img src="./business-reports-attached.png" alt="Digital Dokan business reports preview" loading="lazy" width="1066" height="641">
                         <figcaption class="sr-only">Compact business reports preview.</figcaption>
                     </figure>
                 </div>
@@ -1694,7 +1747,7 @@
                                 <li>Up to 50 Items</li>
                                 <li>Basic Sales Tracking</li>
                             </ul>
-                            <button class="btn btn-dark" style="width:100%" onclick="openAuth('login')">Start 7-Day Free Trial</button>
+                            <button class="btn btn-dark" style="width:100%" onclick="window.location.href='./mydokan2.html'">Start 7-Day Free Trial</button>
                         </article>
                         <article class="price-card featured">
                             <span class="badge">POPULAR</span>
@@ -1825,7 +1878,7 @@
                 <div class="footer-grid">
                     <div>
                         <a class="brand" href="./index.html">
-                            <img class="mark" src="./digital-dokan-icon.webp" alt="Digital Dokan logo">
+                            <img class="mark" src="./digital-dokan-icon.webp" alt="Digital Dokan logo" width="768" height="768">
                             <span>
                                 Digital Dokan<small>Smart POS - Khata - Inventory</small>
                             </span>
@@ -1847,6 +1900,8 @@
                     <div>
                         <h4>Support</h4>
                         <a href="mailto:dokanretailkhata@gmail.com">dokanretailkhata@gmail.com</a>
+                        <a href="./privacy.html">Privacy Policy</a>
+                        <a href="./terms.html">Terms of Use</a>
                     </div>
                 </div>
                 <div class="copyright">Copyright 2026 Digital Dokan. All rights reserved.</div>
@@ -1960,42 +2015,11 @@
         <script>
             lucide.createIcons();
             const appUrl = './mydokan2.html';
-            const AUTH_KEY = 'digital_dokan_auth_v1';
-            const LOGIN_ACCOUNTS = [{
-                email: 'studiohub104@gmail.com',
-                password: 'faiza@12345',
-                plan: '7 Days Free Trial',
-                expires: '2099-12-31'
-            }, {
-                email: 'dokanretailkhata@gmail.com',
-                password: 'studio@12345',
-                plan: 'Monthly Package',
-                expires: '2027-12-31'
-            }, {
-                email: 'aurmorapk@gmail.com',
-                password: 'aura@12345',
-                plan: 'Yearly Package',
-                expires: '2027-12-31'
-            }];
-            function getUser() {
-                try {
-                    return JSON.parse(localStorage.getItem(AUTH_KEY) || 'null')
-                } catch (error) {
-                    return null
-                }
-            }
-            function checkSubscriptionStatus(account) {
-                const expiresAt = new Date(account.expires + 'T23:59:59');
-                return {
-                    active: account.status !== 'expired' && expiresAt.getTime() > Date.now(),
-                    expiresAt
-                }
-            }
+            /* DD-FIX (Stage B-1): the landing page no longer keeps its own account list (it held plain-text
+               passwords in a public file). Real accounts live in Firebase Auth inside the app; every entry
+               point simply routes to the app, which handles sign-in and sign-up. */
             function goApp() {
-                if (getUser()) {
-                    window.location.href = appUrl
-                } else
-                    openAuth()
+                window.location.href = appUrl
             }
             function toggleMenu() {
                 const menu = document.getElementById('mobileMenu');
@@ -2021,30 +2045,8 @@
             }
             document.getElementById('loginForm').addEventListener('submit', event => {
                 event.preventDefault();
-                const email = document.getElementById('loginEmail').value.trim().toLowerCase()
-                  , password = document.getElementById('loginPassword').value
-                  , branch = document.getElementById('loginBranch').value.trim()
-                  , status = document.getElementById('loginStatus')
-                  , account = LOGIN_ACCOUNTS.find(item => item.email === email && item.password === password);
-                if (!account) {
-                    status.textContent = 'Master email or password is incorrect.';
-                    status.classList.remove('hidden');
-                    return
-                }
-                const subscription = checkSubscriptionStatus(account);
-                if (!subscription.active) {
-                    status.textContent = 'This subscription has expired. Please contact Digital Dokan support.';
-                    status.classList.remove('hidden');
-                    return
-                }
-                localStorage.setItem(AUTH_KEY, JSON.stringify({
-                    name: 'Digital Dokan User',
-                    email,
-                    branch,
-                    plan: account.plan,
-                    subscriptionExpires: account.expires,
-                    loggedIn: true
-                }));
+                /* DD-FIX (Stage B-1): no local credential check on the landing page — the real Firebase
+                   sign-in lives in the app. The modal design is unchanged; Login routes to the app. */
                 window.location.href = appUrl
             }
             );

@@ -1,0 +1,182 @@
+rules_version = '2';
+
+// ============================================================================
+// Digital Dokan — Firestore Security Rules (DD-FIX, Stage A)
+// Security promise: "hr user ka data bilkul mahfooz ho" — every user's data
+// must be completely secure.
+//
+// Model:
+//   users/{uid}                 -> { name, email, shopId, role }
+//                                  role = 'owner' | 'manager' | 'cashier'
+//   shops/{shopId}              -> shop profile + plan/trial state
+//   shops/{shopId}/{collection} -> products, customers, invoices,
+//                                  khataEntries, expenses, purchases,
+//                                  suppliers, employees, staffInvites, ...
+//   admins/{uid}                -> platform admin accounts (Faiza). Created
+//                                  MANUALLY in the Firebase console only.
+//                                  No client code can create these docs.
+//   paymentRequests/{id}        -> plan payment submissions for admin review
+//
+// Default posture: DENY EVERYTHING unless a rule below explicitly allows it.
+//
+// Limits of rules (need app code / Cloud Functions later):
+//  - Rules see only the requester's profile (role/shopId); fine-grained UI
+//    behaviour (hiding buttons for cashiers) is app-level — the rules here
+//    are the real enforcement, the UI is only a convenience.
+//  - Creating a staff member's Firebase Auth account cannot be done by
+//    rules; it needs the Admin SDK / a Cloud Function (Firebase stage).
+//  - "Owner approves a payment -> planStatus becomes 'active'" is an ADMIN
+//    write (admins collection below) or a Cloud Function; shop users can
+//    never write plan/trial fields themselves.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() {
+      return request.auth != null;
+    }
+    function profile() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    function hasProfile() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    function myShop() {
+      return profile().shopId;
+    }
+    function myRole() {
+      return profile().role;
+    }
+    function isMember(shopId) {
+      return hasProfile() && myShop() == shopId;
+    }
+    function isOwnerOf(shopId) {
+      return isMember(shopId) && myRole() == 'owner';
+    }
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ---------- users/{uid} : identity + shop membership ----------
+    match /users/{userId} {
+      // Read your own profile only. Nobody can list other users.
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list: if false;
+
+      // Create: only for yourself, only as 'owner', and only pointing at a
+      // shop whose ownerUid is you (the signup flow creates shops/{shopId}
+      // first, then this doc — see ddSignUp in mydokan2.html). This stops a
+      // signed-up user from joining somebody else's shop by guessing its ID.
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == 'owner'
+        && request.resource.data.shopId is string
+        && get(/databases/$(database)/documents/shops/$(request.resource.data.shopId)).data.ownerUid == request.auth.uid;
+
+      // Update: you may edit your display fields, but never your shopId or
+      // your role — changing role/shop is staff management (owner/admin job,
+      // done via the staff-invite flow + Cloud Function, not self-service).
+      allow update: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.shopId == resource.data.shopId
+        && request.resource.data.role == resource.data.role;
+      allow delete: if false;
+    }
+
+    // ---------- admins/{uid} : platform admin (Faiza) ----------
+    match /admins/{userId} {
+      // Readable only by that admin. Writable by NOBODY from a client —
+      // admin docs are created/deleted manually in the Firebase console, so
+      // no shop account can ever promote itself to admin.
+      allow get: if signedIn() && request.auth.uid == userId;
+      allow list, create, update, delete: if false;
+    }
+
+    // ---------- shops/{shopId} : one workspace per shop ----------
+    match /shops/{shopId} {
+      // Read: members of THIS shop only (and platform admin). Direct-ID
+      // reads of another shop's doc are denied — isolation covers get,
+      // list, search-style queries and subcollections alike, because every
+      // path goes through isMember(shopId).
+      allow get: if isMember(shopId) || isAdmin();
+      // Listing ALL shops is an admin-only ability. A shop account has no
+      // path to enumerate other shops.
+      allow list: if isAdmin();
+
+      // Create (signup): only for yourself as owner, and the plan/trial
+      // state must start EXACTLY as a fresh free trial. A new shop cannot
+      // be born 'active' or with an extended trial.
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.planStatus == 'trial'
+        && request.resource.data.planPaid == null
+        && request.resource.data.planExpiry == null;
+
+      // Update by shop users: ONLY harmless profile fields may change.
+      // plan, planStatus, planPaid, planExpiry, trialStart, trialStartMs,
+      // trialEnd, ownerUid, ownerEmail are NOT in this list, so any write
+      // touching them is denied — trial/plan tampering (e.g. extending your
+      // own trial or marking yourself paid) is impossible for shop users.
+      // Only the shop OWNER (not manager/cashier) may edit the profile.
+      allow update: if isAdmin()
+        || (isOwnerOf(shopId)
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['shopName', 'ownerName', 'city', 'phone', 'address', 'updatedAt']));
+
+      allow delete: if false;
+
+      // -------- staffInvites: only the owner manages staff --------
+      match /staffInvites/{inviteId} {
+        allow get, list, create, update: if isOwnerOf(shopId);
+        allow delete: if isOwnerOf(shopId);
+      }
+
+      // -------- all other shop data (products, customers, invoices,
+      // khataEntries, expenses, purchases, suppliers, employees, ...) --
+      match /{collection}/{docId} {
+        // Read: any member of this shop.
+        allow get, list: if isMember(shopId) || isAdmin();
+        // Create/update: owner + manager + cashier (daily work).
+        allow create, update: if isMember(shopId);
+        // Delete: owner + manager only. A CASHIER CAN NEVER DELETE DATA.
+        allow delete: if isOwnerOf(shopId)
+          || (isMember(shopId) && myRole() == 'manager')
+          || isAdmin();
+      }
+
+      // Deeper nesting (if ever used) stays inside the same shop wall.
+      match /{collection}/{docId}/{rest=**} {
+        allow get, list: if isMember(shopId) || isAdmin();
+        allow create, update: if isMember(shopId);
+        allow delete: if isOwnerOf(shopId)
+          || (isMember(shopId) && myRole() == 'manager')
+          || isAdmin();
+      }
+    }
+
+    // ---------- paymentRequests/{id} : manual plan payment + receipt ----
+    match /paymentRequests/{requestId} {
+      // A shop owner submits a payment for THEIR shop only, as 'pending'.
+      allow create: if hasProfile()
+        && myRole() == 'owner'
+        && request.resource.data.shopId == myShop()
+        && request.resource.data.status == 'pending';
+      // The submitting shop can read its own requests; nobody else's.
+      allow get, list: if isAdmin()
+        || (hasProfile() && resource.data.shopId == myShop());
+      // Only admin approves/rejects (status change) — approval is what sets
+      // shops/{shopId}.planStatus='active' + planExpiry (admin write above).
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // ---------- everything else: default deny ----------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

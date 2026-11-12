@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /digital-dokan/mydokan2.html
+
+Sitemap: https://digitaldokanapp.github.io/digital-dokan/sitemap.xml

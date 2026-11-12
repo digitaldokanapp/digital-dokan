@@ -8,6 +8,10 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <title>Digital Dokan Pro — POS, Khata & Inventory</title>
+        <meta name="robots" content="noindex, nofollow">
+        <link rel="icon" type="image/webp" href="./digital-dokan-icon.webp">
+        <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="./favicon-180.png">
         <style>
             :root {
                 --bg: #050805;
@@ -1994,20 +1998,21 @@
                             </div>
                         </div>
                         <div class="card pad" style="margin-top:16px">
-                            <div class="card-head"><div><div class="card-title">☁️ Cloud Database & Multi-Branch</div><div class="hint">Google sign-in identifies your business account. Firestore keeps the same business data available across signed-in phones and laptops when configured.</div></div><span class="badge blue" id="cloudStatus">Local mode</span></div>
-                            <div class="field"><label>Firebase Web Config (JSON)</label><textarea class="textarea" id="cloudConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea></div>
-                            <div class="grid g2">
+                            <div class="card-head"><div><div class="card-title">☁️ Cloud Database & Multi-Branch</div><div class="hint">Your Digital Dokan account identifies your shop. Firestore keeps your shop’s data available — and private to your shop — across your signed-in phones and laptops.</div></div><span class="badge blue" id="cloudStatus">Local mode</span></div>
+                            <!-- DD-FIX (Stage B-1): the real project config is built into the app; these legacy fields are hidden (kept in the DOM only so loadCloudSettings() stays harmless). -->
+                            <div class="field" style="display:none"><label>Firebase Web Config (JSON)</label><textarea class="textarea" id="cloudConfig" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea></div>
+                            <div class="grid g2" style="display:none">
                                 <div class="field"><label>Business / Tenant ID</label><input class="input" id="cloudTenantId" placeholder="Leave empty to use your Google account ID"></div>
                                 <div class="field"><label>Cloud Account</label><div class="input" id="cloudAccount">Not connected</div></div>
                             </div>
                             <div class="actions">
-                                <button class="btn green" onclick="saveCloudConfig()">Save Cloud Config</button>
-                                <button class="btn green" onclick="startGoogleCloud()">☁️ Sign in & Sync</button>
+                                <button class="btn green" style="display:none" onclick="saveCloudConfig()">Save Cloud Config</button>
+                                <!-- DD-FIX (Stage B-1): Google-connect button removed — shops sign in with their Digital Dokan email account; sync is automatic. cloudPull/cloudPush below now delegate to the per-shop cloud layer. -->
                                 <button class="btn" onclick="cloudPull()">↓ Pull Cloud Data</button>
-                                <button class="btn" onclick="cloudPush()">↑ Push Local Data</button>
+                                <button class="btn" onclick="cloudPush()">↑ Push Shop Data</button>
                                 <button class="btn" onclick="syncNow()">↻ Sync Now</button>
                             </div>
-                            <div class="hint" style="margin-top:10px">Production note: Firebase config and Firestore Security Rules must be configured for your own project. This UI never stores a Gmail password.</div>
+                            <div class="hint" style="margin-top:10px">Your data is protected by Firebase Authentication and Firestore security rules: only your shop’s signed-in members can reach your shop’s data. This app never stores your password.</div>
                         </div>
                         <div class="card pad" style="margin-top:16px">
                             <div class="card-head"><div><div class="card-title">🏢 Branches</div><div class="hint">Prepare separate branches while keeping one business account and shared master data.</div></div><button class="btn green" onclick="addBranch()">+ Add Branch</button></div>
@@ -2251,14 +2256,11 @@
                 </div>
                 <span class="badge green">DIGITAL DOKAN PRO</span>
                 <h2 id="gateTitle">Welcome to Digital Dokan</h2>
-                <p id="gateText">Your first 7 days are free. After the trial, a Pro license is required to continue.</p>
+                <p id="gateText">Your first 7 days are free. After the trial, a subscription plan is required to continue.</p>
                 <div class="trial-clock" id="trialClock">Starting your free trial…</div>
-                <div class="field">
-                    <label>Pro License Key</label>
-                    <input class="input" id="licenseKey" placeholder="Enter your Pro key">
-                </div>
-                <button class="btn green wide" onclick="activateLicense()">Activate Pro License</button>
-                <div class="tiny muted" style="margin-top:12px">This local version protects access on this browser. For a real commercial license, connect the app to your secure server.</div>
+                <!-- DD-FIX (Stage B-1): license-key field removed — plans are activated per shop by subscription approval, not by a shared key. -->
+                <button class="btn green wide" onclick="goToPricing()">View Plans</button>
+                <div class="tiny muted" style="margin-top:12px">Your shop account and subscription are managed securely in the cloud. Sign in with your Digital Dokan account to continue.</div>
             </div>
         </div>
         <div class="subscription-lock" id="subscriptionLock">
@@ -2266,6 +2268,13 @@
                 <div class="badge red">SUBSCRIPTION LOCKED</div>
                 <h2 id="subscriptionLockTitle">Your Subscription/Trial has expired</h2>
                 <p id="subscriptionLockText">Your Subscription/Trial has expired. Please contact support at +923257633875 to upgrade.</p>
+                <!-- DD-FIX: plans + data-safe note + manual payment path (owner approval activates the plan, roadmap Phase 4.3) -->
+                <div class="tiny" style="margin-top:10px;text-align:left">
+                    <div><b>Monthly</b> — Rs. 3,000 / month</div>
+                    <div><b>Yearly</b> — Rs. 27,000 / year</div>
+                    <div style="margin-top:8px">Your data is safe — nothing is deleted. New sales, khata entries and products stay paused until a plan is active.</div>
+                    <div style="margin-top:8px">To subscribe: pay by EasyPaisa / JazzCash, then send your payment receipt on WhatsApp +923257633875. After approval your plan is activated here.</div>
+                </div>
                 <div class="actions" style="justify-content:center;margin-top:18px"><button class="btn green" onclick="goToPricing()">View Pricing</button><button class="btn" onclick="signOutLocalSession()">Sign Out</button></div>
             </div>
         </div>
@@ -2274,12 +2283,27 @@
             <div class="dd-login-card">
                 <div class="badge green">DIGITAL DOKAN</div>
                 <h2>Sign in to Digital Dokan</h2>
-                <div class="hint">Use your Digital Dokan account. The same account can sync business data across devices when cloud sync is configured.</div>
+                <div class="hint">Sign in with the email and password of your Digital Dokan account. Your shop’s data syncs securely across your devices — and only your shop can see it.</div>
                 <div class="field"><label>Email</label><input class="input" id="ddLoginEmail" type="email" autocomplete="username" placeholder="Email address"></div>
                 <div class="field"><label>Password</label><input class="input" id="ddLoginPassword" type="password" autocomplete="current-password" placeholder="Password" onkeydown="if(event.key==='Enter')ddLogin()"></div>
                 <div class="dd-login-error" id="ddLoginError"></div>
                 <button class="btn green wide" onclick="ddLogin()">Sign In</button>
+                <div class="tiny" id="ddAuthMsg" style="margin-top:8px"></div>
+                <!-- DD-FIX: Sign Up + Forgot Password UI (multi-user foundation). The JS actions are gated: with no Firebase projectId they only show the "cloud accounts are not enabled yet" message and never touch the local demo login flow. -->
+                <div class="flex between center" style="margin-top:10px">
+                    <button class="btn sm" type="button" onclick="ddShowSignup()">New shop? Create account</button>
+                    <button class="btn sm" type="button" onclick="ddForgotPassword()">Forgot password?</button>
+                </div>
+                <div id="ddSignupFields" style="display:none;margin-top:12px">
+                    <div class="field"><label>Full Name</label><input class="input" id="ddSignupName" type="text" autocomplete="name" placeholder="Your full name"></div>
+                    <div class="field"><label>Shop Name</label><input class="input" id="ddSignupShop" type="text" autocomplete="organization" placeholder="Your shop / business name"></div>
+                    <div class="field"><label>Email</label><input class="input" id="ddSignupEmail" type="email" autocomplete="email" placeholder="Email address"></div>
+                    <div class="field"><label>Password</label><input class="input" id="ddSignupPassword" type="password" autocomplete="new-password" placeholder="Password (min. 6 characters)"></div>
+                    <button class="btn green wide" type="button" onclick="ddSignUp()">Create Account</button>
+                    <div style="margin-top:10px"><button class="btn sm" type="button" onclick="ddShowLogin()">Back to Sign In</button></div>
+                </div>
                 <div class="tiny muted" style="margin-top:12px">Cloud sync uses Firebase Authentication + Firestore. Do not share your password.</div>
+                <div class="tiny muted" style="margin-top:6px"><a href="./privacy.html">Privacy Policy</a> &middot; <a href="./terms.html">Terms of Use</a></div>
             </div>
         </div>
         <div class="toast" id="toast"></div>
@@ -2320,7 +2344,17 @@
             const KEY = 'digital_dokan_v4';
             const LICENSE_KEY = 'digital_dokan_license_v1';
             const TRIAL_DAYS = 7;
-            const DEMO_PRO_KEY = 'DD-PRO-DEMO-2026';
+            /* DD-FIX (Stage B-1): DEMO_PRO_KEY (hard-coded Pro license string) REMOVED. Cloud mode is ON:
+               access is controlled by Firebase Auth + the per-shop plan state in Firestore — never by a
+               shared license key printed in this public file. */
+            /* DD-FIX (Stage B-1): per-shop local cache. DD_ACTIVE_SHOP_KEY remembers which shop this device
+               is signed into; that shop's data is cached ONLY under ddCacheKey(shopId) and is deleted on
+               sign-out. The legacy single blob (KEY / 'digital_dokan_v3') is written only pre-login and is
+               kept as the first-login import source. */
+            const DD_ACTIVE_SHOP_KEY = 'digital_dokan_active_shop_v1';
+            const DD_IMPORT_KEY = 'digital_dokan_cloud_import_v1__';
+            function ddActiveShopId(){try{return localStorage.getItem(DD_ACTIVE_SHOP_KEY)||''}catch(e){return ''}}
+            function ddCacheKey(shopId){return KEY + '__cache__' + shopId}
             const defaults = {
                 business: {
                     name: 'Digital Dokan',
@@ -2485,7 +2519,7 @@
             let db = loadDB()
               , cart = []
               , currentInvoice = null;
-            if (!db.customers.length && !db.sales.length) {
+            if (!ddActiveShopId() && !db.customers.length && !db.sales.length) { /* DD-FIX (Stage B-1): sample-data reseed runs only pre-login, never over a shop cache */
                 db = structuredClone(defaults);
                 saveDB();
             }
@@ -2520,20 +2554,15 @@
                 return access.licensed || trialRemaining() > 0
             }
             function activateLicense() {
-                const key = document.getElementById('licenseKey').value.trim();
-                if (key === DEMO_PRO_KEY || /^DD-PRO-[A-Z0-9-]{6,}$/i.test(key)) {
-                    access = {
-                        licensed: true,
-                        activatedAt: Date.now(),
-                        keyHint: key.slice(0, 8) + '…'
-                    };
-                    localStorage.setItem(LICENSE_KEY, JSON.stringify(access));
-                    document.getElementById('licenseGate').classList.remove('show');
-                    showToast('Digital Dokan Pro activated');
-                    updateAccessUI();
-                } else
-                    alert('Invalid Pro License Key.');
+                /* DD-FIX (Stage B-1): license-key activation DISABLED. There is no shared Pro key anymore —
+                   plans are activated per shop by subscription approval (see the Subscription section in
+                   Settings and the lock screen's payment steps). Kept as a safe no-op because older
+                   markup referenced it. */
+                showToast('Pro is activated by your subscription \u2014 no license key is needed.');
+                const gate = document.getElementById('licenseGate');
+                if (gate) gate.classList.remove('show');
             }
+
             function updateAccessUI() {
                 const pill = document.getElementById('trialPill')
                   , clock = document.getElementById('trialClock')
@@ -2564,6 +2593,16 @@
 
             function loadDB() {
                 try {
+                    /* DD-FIX (Stage B-1): with an active shop on this device, load ONLY that shop's cache —
+                       never the shared legacy blob (that blob is another era's data, used solely as the
+                       first-login import source in ddCloudPull). */
+                    const shopId = ddActiveShopId();
+                    if (shopId) {
+                        const cached = JSON.parse(localStorage.getItem(ddCacheKey(shopId)) || 'null');
+                        if (cached)
+                            return mergeDB(cached);
+                        return structuredClone(defaults);
+                    }
                     let saved = JSON.parse(localStorage.getItem(KEY) || 'null');
                     if (!saved)
                         saved = JSON.parse(localStorage.getItem('digital_dokan_v3') || 'null');
@@ -2597,7 +2636,13 @@
                 };
             }
             function saveDB() {
-                localStorage.setItem(KEY, JSON.stringify(db))
+                /* DD-FIX (Stage B-1): per-shop cache keying — with an active shop, data is cached ONLY under
+                   that shop's key; the legacy single blob is written only when no shop is active (pre-login). */
+                const shopId = ddActiveShopId();
+                if (shopId) {
+                    try { localStorage.setItem(ddCacheKey(shopId), JSON.stringify(db)) } catch (e) {}
+                } else
+                    localStorage.setItem(KEY, JSON.stringify(db))
             }
             function id(prefix) {
                 return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7)
@@ -2898,7 +2943,7 @@
                 }
                 );
                 if (customer && due > 0)
-                    addKhata(customer.id, due, 'credit', sale.invoice, `Sale ${sale.invoice}`, payment);
+                    addKhata(customer.id, total, 'credit', sale.invoice, `Sale ${sale.invoice}`, payment); /* DD-FIX: credit the FULL sale total (was: due only). Balance = credits - payments, so crediting 'due' and then recording the part-payment subtracted the paid amount twice and understated the receivable on every Partial sale. Net is now total - paid = due. */
                 if (customer && paid > 0 && due > 0)
                     addKhata(customer.id, paid, 'payment', sale.invoice, `Paid against ${sale.invoice}`, payment);
                 saveDB();
@@ -2925,8 +2970,9 @@
                     subtotal: cartSubtotal(),
                     discount: num(document.getElementById('posDiscount').value),
                     total: cartTotal(),
-                    paid: document.getElementById('posPayment').value === 'Udhaar' ? 0 : cartTotal(),
-                    due: document.getElementById('posPayment').value === 'Udhaar' ? cartTotal() : 0,
+                    /* DD-FIX: draft print now respects Partial payments (was: anything not Udhaar printed as fully paid). */
+                    paid: document.getElementById('posPayment').value === 'Udhaar' ? 0 : document.getElementById('posPayment').value === 'Partial' ? Math.min(cartTotal(), num(document.getElementById('posPaid').value)) : cartTotal(),
+                    due: getDueForSale(cartTotal(), document.getElementById('posPayment').value, num(document.getElementById('posPaid').value)),
                     payment: document.getElementById('posPayment').value
                 };
                 printInvoice(temp);
@@ -3200,6 +3246,9 @@
                 document.getElementById('setBusinessAddress').value = db.business.address;
                 document.getElementById('setInvoiceFooter').value = db.business.footer
             }
+            /* DD-FIX (security): this backup exports the data of the shop currently open in this browser only.
+               In the Firebase design the same rule is enforced by firestore.rules: an export must read ONLY
+               shops/{signed-in shopId} — never other shops, never the admin collections. */
             function backupData() {
                 const blob = new Blob([JSON.stringify(db, null, 2)],{
                     type: 'application/json'
@@ -3217,7 +3266,17 @@
                 const r = new FileReader();
                 r.onload = () => {
                     try {
-                        db = mergeDB(JSON.parse(r.result));
+                        /* DD-FIX: shape-check the file and confirm before replacing current data (was: silent overwrite of anything JSON-parseable). */
+                        const parsed = JSON.parse(r.result);
+                        const known = ['customers','products','sales','khata','purchases','expenses','employees','business'];
+                        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || !known.some(k => k in parsed))
+                            return alert('This file does not look like a Digital Dokan backup.');
+                        for (const k of ['customers','products','sales','khata','purchases','expenses','employees'])
+                            if (k in parsed && !Array.isArray(parsed[k]))
+                                return alert('This backup file is damaged ("' + k + '" should be a list). Nothing was changed.');
+                        if (!confirm('Restore this backup? It will REPLACE all current Digital Dokan data in this browser.'))
+                            return;
+                        db = mergeDB(parsed);
                         saveDB();
                         refresh();
                         showToast('Backup restored successfully')
@@ -3332,6 +3391,11 @@
                 } else {
                     if (data.sku && db.products.some(p => p.sku === data.sku))
                         return alert('SKU already exists.');
+                    /* DD-FIX (Stage B-1): trial = max 50 ITEMS (site spec) — block the 51st product on trial. */
+                    if (typeof ddTrialLimit === 'function' && ddTrialLimit(ddGetSub())) {
+                        showSubscriptionLock('Trial item limit reached');
+                        return
+                    }
                     db.products.push({
                         id: id('prd'),
                         ...data
@@ -3603,39 +3667,41 @@
             function addBranch(){const name=prompt('Branch name');if(!name)return;db.branches.push({id:id('branch'),name:name.trim(),active:true});saveDB();renderBranches();showToast('Branch added');}
             function renderBranches(){const el=document.getElementById('branchList');if(!el)return;el.innerHTML=(db.branches||[]).map(b=>`<div class="flex between center" style="padding:10px 0;border-bottom:1px solid var(--line)"><span><b>${esc(b.name)}</b> ${b.active?'<span class="badge green">Active</span>':''}</span><button class="btn sm" onclick="setBranch('${b.id}')">Use Branch</button></div>`).join('');}
             function setBranch(id){db.branches.forEach(b=>b.active=b.id===id);db.activeBranchId=id;saveDB();renderBranches();showToast('Active branch changed');}
-            function syncNow(){if(window.cloudSync?.ready&&db.cloud?.uid)cloudPush();else showToast('Cloud is not connected — local data is safe in this browser');}
-            window.addEventListener('online',()=>{if(window.cloudSync?.ready&&typeof cloudPush==='function')cloudPush();});
+            function syncNow(){/* DD-FIX (Stage B-1): sync = push this shop's payload via the DD_FB per-shop layer */ if(window.DD_FB?.auth?.currentUser&&window.DD_SHOP_CTX){ddCloudPush();showToast('Syncing your shop data…')}else showToast('Sign in with your Digital Dokan account to sync — your data stays on this device until then');}
+            /* DD-FIX (Stage B-1): legacy cloudSync 'online' push retired — the DD_FB layer has its own online listener at the end of this script. */
             renderHR(); renderBranches();
 
             /* Firebase cloud adapter. Add your Firebase web config in this file or expose it as window.DD_FIREBASE_CONFIG. */
-            window.DD_FIREBASE_CONFIG = (()=>{try{return JSON.parse(localStorage.getItem('dd_firebase_config')||'null')}catch(e){return null}})() || {apiKey:'',authDomain:'',projectId:'',storageBucket:'',messagingSenderId:'',appId:''};
+            /* DD-FIX (Stage B-1): the REAL Firebase project is wired in — cloud mode is ON from this build.
+               Project: digital-dokan-a669e (owner account dokanretailkhata@gmail.com; Email/Password auth
+               enabled; Firestore production, region nam5). A Firebase web config is a public client
+               identifier, not a password — protection comes from firestore.rules, not from hiding it.
+               A config previously saved via Settings > Cloud (localStorage 'dd_firebase_config') still
+               overrides this built-in default. */
+            window.DD_FIREBASE_CONFIG = (()=>{try{return JSON.parse(localStorage.getItem('dd_firebase_config')||'null')}catch(e){return null}})() || {apiKey:'AIzaSyDBcUnJxixOzo5fJEs02o4lSxuyiozSweg',authDomain:'digital-dokan-a669e.firebaseapp.com',projectId:'digital-dokan-a669e',storageBucket:'digital-dokan-a669e.firebasestorage.app',messagingSenderId:'763038704365',appId:'1:763038704365:web:2babf4f8f672a4fd2b22e4'};
             window.cloudSync={ready:false};
-            async function initCloud(){
-                const cfg=window.DD_FIREBASE_CONFIG;
-                if(!cfg.projectId)return;
-                try{
-                    const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged},{getFirestore,doc,setDoc,getDoc,enableIndexedDbPersistence}]=await Promise.all([
-                        import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),
-                        import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'),
-                        import('https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js')
-                    ]);
-                    const app=initializeApp(cfg),auth=getAuth(app),fs=getFirestore(app); try{await enableIndexedDbPersistence(fs)}catch(e){}
-                    window.cloudSync.ready=true; window.cloudSync.auth=auth; window.cloudSync.fs=fs; window.cloudSync.doc=doc; window.cloudSync.setDoc=setDoc; window.cloudSync.getDoc=getDoc; window.cloudSync.provider=GoogleAuthProvider; window.cloudSync.signInWithPopup=signInWithPopup;
-                    onAuthStateChanged(auth,u=>{db.cloud.uid=u?.uid||'';db.cloud.email=u?.email||'';db.cloud.enabled=!!u;saveDB();document.getElementById('cloudStatus').textContent=u?('Cloud • '+u.email):'Cloud ready';});
-                }catch(e){console.warn('Cloud setup failed',e);showToast('Cloud setup needs Firebase configuration');}
-            }
-            async function startGoogleCloud(){
-                if(!window.cloudSync.ready){await initCloud();}
-                if(!window.cloudSync.ready){showToast('Add Firebase web config first');return;}
-                try{const res=await window.cloudSync.signInWithPopup(window.cloudSync.auth,new window.cloudSync.provider());db.cloud.uid=res.user.uid;db.cloud.email=res.user.email;db.cloud.enabled=true;saveDB();await cloudPull();showToast('Google account connected and data synced');}catch(e){console.error(e);showToast('Google sign-in was cancelled or blocked');}
-            }
-            function cloudRef(){const tenant=db.cloud.tenantId||db.cloud.uid;if(!tenant)return null;return window.cloudSync.doc(window.cloudSync.fs,'businesses',tenant);}
-            async function cloudPush(){if(!window.cloudSync.ready||!db.cloud?.uid){showToast('Connect Google account first');return;}const ref=cloudRef();if(!ref)return;try{await window.cloudSync.setDoc(ref,{ownerUid:db.cloud.uid,ownerEmail:db.cloud.email,updatedAt:Date.now(),data:db},{merge:false});showToast('Cloud backup saved');}catch(e){console.error(e);showToast('Cloud save failed');}}
-            async function cloudPull(){if(!window.cloudSync.ready||!db.cloud?.uid){showToast('Connect Google account first');return;}const ref=cloudRef();if(!ref)return;try{const snap=await window.cloudSync.getDoc(ref);if(!snap.exists()){await cloudPush();return;}const remote=snap.data().data;if(remote){db=mergeDB(remote);localStorage.setItem(KEY,JSON.stringify(db));refresh();renderHR();renderBranches();showToast('Cloud data loaded on this device');}}catch(e){console.error(e);showToast('Cloud load failed');}}
+            /* DD-FIX (Stage B-1): the legacy Google-popup cloud adapter (initCloud / window.cloudSync) is
+               RETIRED. It synced one shared businesses/{tenant} document keyed by a hand-typed tenant ID —
+               incompatible with per-shop isolation and denied by firestore.rules. All cloud traffic now
+               goes through the DD_FB email-account layer (ddFirebaseInit) under shops/{shopId}. This stays
+               as a no-op so any stale reference fails safe; window.cloudSync.ready remains false forever. */
+            async function initCloud(){ return; }
+
+            /* DD-FIX (Stage B-1): Google connect retired — see the initCloud note above. */
+            async function startGoogleCloud(){ showToast('Shops now sign in with their Digital Dokan email account \u2014 please use the Sign In screen.'); }
+
+            /* DD-FIX (Stage B-1): the Settings cloud buttons keep their names but now delegate to the
+               per-shop DD_FB layer (shops/{shopId}/data/main). The old businesses/{tenant} sync is gone. */
+            function cloudRef(){ return null; }
+            async function cloudPush(){ return ddCloudPush(); }
+            async function cloudPull(){ return ddCloudPull(); }
+
             /* Wrap saves so normal POS/Khata/Inventory actions also queue a cloud write when connected. */
             const _localSaveDB=saveDB;
-            saveDB=function(){_localSaveDB(); if(window.cloudSync?.ready&&db.cloud?.uid){clearTimeout(window.__cloudSaveTimer);window.__cloudSaveTimer=setTimeout(()=>cloudPush(),700);}};
-            document.getElementById('cloudTenantId')?.addEventListener('change',e=>{db.cloud.tenantId=e.target.value.trim();saveDB();});
+            /* DD-FIX (Stage B-1): legacy cloudSync save-wrapper neutralised — it pushed to businesses/{tenant}.
+               The single active cloud save path is the DD_FB wrapper at the end of this script (ddCloudPush). */
+            saveDB=function(){_localSaveDB();};
+            /* DD-FIX (Stage B-1): hand-typed Tenant ID removed — tenantId is always the signed-in shopId set by ddResolveShop(). */
             function saveCloudConfig(){
                 try{
                     const cfg=JSON.parse(document.getElementById('cloudConfig').value.trim());
@@ -3657,11 +3723,10 @@
             const DD_SESSION_KEY='digital_dokan_session_token_v1';
             const DD_DEVICE_KEY='digital_dokan_device_id_v1';
             const DD_AUTH_KEY='digital_dokan_auth_v1';
-            const DD_DEMO_ACCOUNTS={
-                'studiohub104@gmail.com':{plan:'7_days_trial',passwordHash:'31c8b12e1e316886219d63f848416ce3a64543d521ab96fcbfecc4f5cc523d5c'},
-                'dokanrretailkhata@gmail.com':{plan:'monthly_package',passwordHash:'5625028af06279c14cb50ee9e6d8bda72ba76d3a16ede0a367a8fc9ed606faa9'},
-                'auramorapk@gmail.com':{plan:'yearly_package',passwordHash:'b72f8e9384c4e46259dacee5acc7e8439c824af3dced992abaa46454805d3fec'}
-            };
+            /* DD-FIX (Stage B-1): DD_DEMO_ACCOUNTS REMOVED. The hard-coded email -> SHA-256 password-hash
+               list was readable by anyone who downloaded this public file. Cloud mode is ON: Firebase Auth
+               is the ONLY login, and any demo is a normal account in the database — never code. */
+
             const DD_PLAN_LIMITS={'7_days_trial':0,'monthly_package':3,'yearly_package':5};
             function ddNormPlan(p){const x=String(p||'').toLowerCase().trim();if(['trial','7_days_trial','7-days-trial','free_trial'].includes(x))return'7_days_trial';if(['monthly','monthly_package','pro_monthly'].includes(x))return'monthly_package';if(['yearly','yearly_package','pro_yearly'].includes(x))return'yearly_package';return x||'7_days_trial'}
             function ddDeviceId(){let x=localStorage.getItem(DD_DEVICE_KEY);if(!x){x=id('device');localStorage.setItem(DD_DEVICE_KEY,x)}return x}
@@ -3671,41 +3736,218 @@
             function ddSetAuth(email,plan,uid=''){const a={email:String(email).toLowerCase(),plan_type:ddNormPlan(plan),uid:uid||'',loggedInAt:Date.now()};localStorage.setItem(DD_AUTH_KEY,JSON.stringify(a));return a}
             function ddExpiryFor(plan,start){const days=plan==='7_days_trial'?7:plan==='monthly_package'?30:365;return new Date(start+days*86400000).toISOString()}
             function ddGetSub(){
-                const auth=ddAuth()||{};const email=String(auth.email||db.subscription?.master_email||'').toLowerCase();const demo=DD_DEMO_ACCOUNTS[email];
+                const auth=ddAuth()||{};const email=String(auth.email||db.subscription?.master_email||'').toLowerCase(); /* DD-FIX (Stage B-1): plan is no longer forced from a hard-coded account list — it comes from the shop's server-side plan state via ddApplyServerTrial */
                 const saved=(()=>{try{return JSON.parse(localStorage.getItem(DD_SUB_KEY)||'null')}catch(e){return null}})()||{};
-                const sub={...(db.subscription||{}),...saved};const plan=ddNormPlan(demo?.plan||sub.plan_type||auth.plan_type);sub.plan_type=plan;sub.master_email=email;sub.master_uid=sub.master_uid||auth.uid||'';sub.max_sub_users=DD_PLAN_LIMITS[plan];
+                const sub={...(db.subscription||{}),...saved};const plan=ddNormPlan(sub.plan_type||auth.plan_type);sub.plan_type=plan;sub.master_email=email;sub.master_uid=sub.master_uid||auth.uid||'';sub.max_sub_users=DD_PLAN_LIMITS[plan];
                 if(!sub.trial_start){sub.trial_start=Date.now();sub.expiry_date=ddExpiryFor(plan,sub.trial_start)}
                 if(!sub.expiry_date)sub.expiry_date=ddExpiryFor(plan,sub.trial_start||Date.now());
                 sub.invoice_count=Math.max(Number(sub.invoice_count||0),Array.isArray(db.sales)?db.sales.length:0);db.subscription=sub;localStorage.setItem(DD_SUB_KEY,JSON.stringify(sub));return sub;
             }
             function ddExpired(s){const t=Date.parse(s?.expiry_date||'');return Number.isFinite(t)&&Date.now()>t}
-            function ddTrialLimit(s){return s?.plan_type==='7_days_trial'&&Number(s.invoice_count||0)>=50}
-            function verifySubscriptionAccess(forSale=false){const s=ddGetSub();s.invoice_count=Math.max(Number(s.invoice_count||0),Array.isArray(db.sales)?db.sales.length:0);const blocked=ddExpired(s)||ddTrialLimit(s);if(blocked){showSubscriptionLock(ddTrialLimit(s)?'Trial invoice limit reached':'Your Subscription/Trial has expired');return false}if(forSale&&s.plan_type==='7_days_trial'&&s.invoice_count>=50){showSubscriptionLock('Trial invoice limit reached');return false}localStorage.setItem(DD_SUB_KEY,JSON.stringify(s));return true}
-            function showSubscriptionLock(reason){const e=document.getElementById('subscriptionLock');if(!e)return;document.getElementById('subscriptionLockTitle').textContent=reason==='Trial invoice limit reached'?'Trial invoice limit reached':'Your Subscription/Trial has expired';document.getElementById('subscriptionLockText').textContent='Your Subscription/Trial has expired or the trial invoice limit has been reached. Please contact support at +923257633875 to upgrade.';e.classList.add('show')}
+            function ddTrialLimit(s){/* DD-FIX (Stage B-1): owner decision — the SITE is the spec: the trial limits ITEMS (products) at 50, not invoices. */ return s?.plan_type==='7_days_trial'&&(Array.isArray(db.products)?db.products.length:0)>=50}
+            function verifySubscriptionAccess(forSale=false){const s=ddGetSub();s.invoice_count=Math.max(Number(s.invoice_count||0),Array.isArray(db.sales)?db.sales.length:0);const blocked=ddExpired(s)||ddTrialLimit(s);if(blocked){showSubscriptionLock(ddTrialLimit(s)?'Trial item limit reached':'Your Subscription/Trial has expired');return false}localStorage.setItem(DD_SUB_KEY,JSON.stringify(s));return true}
+            function showSubscriptionLock(reason){const e=document.getElementById('subscriptionLock');if(!e)return;document.getElementById('subscriptionLockTitle').textContent=reason==='Trial item limit reached'?'Trial item limit reached':'Your Subscription/Trial has expired';document.getElementById('subscriptionLockText').textContent='Your Subscription/Trial has expired or the trial limit of 50 items has been reached. Please contact support at +923257633875 to upgrade.';e.classList.add('show')}
             function hideSubscriptionLock(){document.getElementById('subscriptionLock')?.classList.remove('show')}
             function goToPricing(){window.location.href='./index.html#pricing'}
             function canCreateSubUser(){const s=ddGetSub();if(s.plan_type==='7_days_trial')return{ok:false,reason:'The 7-day trial does not include sub-users.'};const count=(db.subUsers||[]).filter(x=>x.status!=='disabled').length;const max=Number(s.max_sub_users||0);return count>=max?{ok:false,reason:`This ${s.plan_type==='monthly_package'?'Monthly':'Yearly'} plan allows a maximum of ${max} users.`}:{ok:true,reason:''}}
             function addSubUser(){const g=canCreateSubUser();if(!g.ok)return alert(g.reason);const name=prompt('Sub-user name');if(!name?.trim())return;const email=prompt('Sub-user email');if(!email?.trim())return;const role=prompt('Role (Admin/Cashier)','Cashier')||'Cashier';db.subUsers=db.subUsers||[];db.subUsers.push({id:id('usr'),name:name.trim(),email:email.trim().toLowerCase(),role:role.trim(),status:'active',createdAt:new Date().toISOString(),branchId:db.activeBranchId||'main'});saveDB();renderSubscriptionPanel();showToast('Sub-user added')}
             function removeSubUser(uid){const u=(db.subUsers||[]).find(x=>x.id===uid);if(u&&confirm(`Disable ${u.name}?`)){u.status='disabled';u.updatedAt=new Date().toISOString();saveDB();renderSubscriptionPanel();showToast('Sub-user disabled')}}
-            function renderSubscriptionPanel(){const h=document.getElementById('subscriptionSettingsPanel');if(!h)return;const s=ddGetSub();const count=(db.subUsers||[]).filter(x=>x.status!=='disabled').length;const max=s.plan_type==='7_days_trial'?0:Number(s.max_sub_users||0);const expiry=s.expiry_date?new Date(s.expiry_date).toLocaleDateString('en-PK'):'—';h.innerHTML=`<div class="subscription-banner"><div><b>${esc(s.master_email||'Account')}</b><div class="tiny muted">Expiry: ${esc(expiry)} • Trial invoices: ${s.invoice_count}/50</div></div><div class="sub-meta"><span class="plan-badge">${esc(s.plan_type)}</span><span class="badge ${ddExpired(s)?'red':'green'}">${ddExpired(s)?'Expired':'Active'}</span></div></div><div class="grid g3"><div class="stat"><div class="stat-label">Plan</div><div class="stat-value" style="font-size:18px">${esc(s.plan_type)}</div></div><div class="stat"><div class="stat-label">Users</div><div class="stat-value" style="font-size:18px">${count}/${max}</div></div><div class="stat"><div class="stat-label">Trial invoices</div><div class="stat-value" style="font-size:18px">${s.invoice_count}/50</div></div></div><div class="actions" style="margin-top:12px"><button class="btn green" onclick="addSubUser()" ${max&&count>=max?'disabled':''}>+ Add Sub-user</button><button class="btn" onclick="verifySubscriptionAccess(false)">Verify Subscription</button><button class="btn" onclick="goToPricing()">Pricing</button><button class="btn" onclick="signOutLocalSession()">Sign Out</button></div><div style="margin-top:14px">${(db.subUsers||[]).map(u=>`<div class="flex between center" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${esc(u.name)}</b><div class="tiny muted">${esc(u.email)} • ${esc(u.role)}</div></div><button class="btn sm red" onclick="removeSubUser('${u.id}')">Disable</button></div>`).join('')||'<div class="empty">No sub-users added.</div>'}</div>`}
+            function renderSubscriptionPanel(){const h=document.getElementById('subscriptionSettingsPanel');if(!h)return;const s=ddGetSub();const count=(db.subUsers||[]).filter(x=>x.status!=='disabled').length;const max=s.plan_type==='7_days_trial'?0:Number(s.max_sub_users||0);const expiry=s.expiry_date?new Date(s.expiry_date).toLocaleDateString('en-PK'):'—';h.innerHTML=`<div class="subscription-banner"><div><b>${esc(s.master_email||'Account')}</b><div class="tiny muted">Expiry: ${esc(expiry)} • Trial items: ${(db.products||[]).length}/50</div></div><div class="sub-meta"><span class="plan-badge">${esc(s.plan_type)}</span><span class="badge ${ddExpired(s)?'red':'green'}">${ddExpired(s)?'Expired':'Active'}</span></div></div><div class="grid g3"><div class="stat"><div class="stat-label">Plan</div><div class="stat-value" style="font-size:18px">${esc(s.plan_type)}</div></div><div class="stat"><div class="stat-label">Users</div><div class="stat-value" style="font-size:18px">${count}/${max}</div></div><div class="stat"><div class="stat-label">Trial items</div><div class="stat-value" style="font-size:18px">${(db.products||[]).length}/50</div></div></div><div class="actions" style="margin-top:12px"><button class="btn green" onclick="addSubUser()" ${max&&count>=max?'disabled':''}>+ Add Sub-user</button><button class="btn" onclick="verifySubscriptionAccess(false)">Verify Subscription</button><button class="btn" onclick="goToPricing()">Pricing</button><button class="btn" onclick="signOutLocalSession()">Sign Out</button></div><div style="margin-top:14px">${(db.subUsers||[]).map(u=>`<div class="flex between center" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${esc(u.name)}</b><div class="tiny muted">${esc(u.email)} • ${esc(u.role)}</div></div><button class="btn sm red" onclick="removeSubUser('${u.id}')">Disable</button></div>`).join('')||'<div class="empty">No sub-users added.</div>'}</div>`}
             function updateSubscriptionUI(){const s=ddGetSub();const pill=document.getElementById('trialPill');if(pill){if(s.plan_type==='7_days_trial'){const left=Math.max(0,Math.ceil((Date.parse(s.expiry_date)-Date.now())/86400000));pill.textContent=left?`Free Trial • ${left} day${left===1?'':'s'} left`:'Trial Expired'}else pill.textContent=s.plan_type==='monthly_package'?'✓ Monthly Pro':'✓ Yearly Pro'}renderSubscriptionPanel()}
             async function ddFirebaseInit(){
                 const cfg=window.DD_FIREBASE_CONFIG;if(!cfg?.projectId)return false;try{
-                    const [{initializeApp,getApps},{getAuth,setPersistence,browserLocalPersistence,signInWithEmailAndPassword,onAuthStateChanged,signOut},{getFirestore,doc,getDoc,setDoc,enableIndexedDbPersistence}]=await Promise.all([import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'),import('https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js')]);
-                    const app=getApps().length?getApps()[0]:initializeApp(cfg);const auth=getAuth(app);await setPersistence(auth,browserLocalPersistence).catch(()=>{});const fs=getFirestore(app);await enableIndexedDbPersistence(fs).catch(()=>{});window.DD_FB={auth,fs,doc,getDoc,setDoc,signInWithEmailAndPassword,signOut};
+                    const [{initializeApp,getApps},{getAuth,setPersistence,browserLocalPersistence,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,onAuthStateChanged,signOut},{getFirestore,doc,getDoc,setDoc,serverTimestamp,enableIndexedDbPersistence}]=await Promise.all([import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js'),import('https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js')]);
+                    const app=getApps().length?getApps()[0]:initializeApp(cfg);const auth=getAuth(app);await setPersistence(auth,browserLocalPersistence).catch(()=>{});const fs=getFirestore(app);await enableIndexedDbPersistence(fs).catch(()=>{});window.DD_FB={auth,fs,doc,getDoc,setDoc,serverTimestamp,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendEmailVerification,sendPasswordResetEmail,signOut,onAuthStateChanged}; /* DD-FIX (Stage B-1): onAuthStateChanged exported for ddWaitAuthUser in ddBoot */ /* DD-FIX: expose signup/verification/reset for the multi-user foundation below */
                     onAuthStateChanged(auth,u=>{if(u){db.cloud.uid=u.uid;db.cloud.email=u.email||'';db.cloud.enabled=true;const a=ddAuth()||{};ddSetAuth(u.email||a.email||'',a.plan_type||ddGetSub().plan_type,u.uid);db.subscription.master_uid=u.uid;db.subscription.master_email=u.email||db.subscription.master_email;saveDB();document.getElementById('cloudStatus')&&(document.getElementById('cloudStatus').textContent='Cloud • '+u.email);ddBindSession(u.uid).catch(()=>{});}});return true;
                 }catch(e){console.warn('Firebase init failed',e);return false}}
-            async function ddBindSession(uid){const s=ddGetSub();if(s.plan_type!=='7_days_trial'||!window.DD_FB)return;const tenant=db.cloud?.tenantId||uid;const ref=window.DD_FB.doc(window.DD_FB.fs,'businesses',tenant,'security','activeSession');const token=ddSessionToken();await window.DD_FB.setDoc(ref,{token,uid,deviceId:ddDeviceId(),updatedAt:Date.now()},{merge:false}).catch(()=>{});if(window.__ddSessionUnsub)window.__ddSessionUnsub();try{const {onSnapshot}=await import('https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js');window.__ddSessionUnsub=onSnapshot(ref,snap=>{const r=snap.data();if(r?.token&&r.token!==ddSessionToken()&&r.uid===uid){document.getElementById('sessionWarning')?.classList.add('show');try{window.DD_FB.signOut(window.DD_FB.auth)}catch(e){};localStorage.removeItem(DD_AUTH_KEY);document.getElementById('ddLoginOverlay')?.classList.add('show');}})}catch(e){}}
-            async function ddCloudPull(){if(!window.DD_FB?.auth?.currentUser)return;const uid=window.DD_FB.auth.currentUser.uid;const tenant=db.cloud?.tenantId||uid;try{const snap=await window.DD_FB.getDoc(window.DD_FB.doc(window.DD_FB.fs,'businesses',tenant));if(snap.exists()){const remote=snap.data()?.data;if(remote){db=mergeDB(remote);db.cloud.uid=uid;db.cloud.email=window.DD_FB.auth.currentUser.email||'';localStorage.setItem(KEY,JSON.stringify(db));refresh();renderHR();renderBranches();updateSubscriptionUI()}}else await ddCloudPush();}catch(e){console.warn(e);showToast('Cloud data could not be loaded')}}
-            async function ddCloudPush(){if(!window.DD_FB?.auth?.currentUser)return;const uid=window.DD_FB.auth.currentUser.uid;const tenant=db.cloud?.tenantId||uid;try{await window.DD_FB.setDoc(window.DD_FB.doc(window.DD_FB.fs,'businesses',tenant),{ownerUid:uid,ownerEmail:window.DD_FB.auth.currentUser.email||'',updatedAt:Date.now(),data:db},{merge:false});document.getElementById('cloudStatus')&&(document.getElementById('cloudStatus').textContent='Cloud • Saved');}catch(e){console.warn(e);document.getElementById('cloudStatus')&&(document.getElementById('cloudStatus').textContent='Cloud • Offline queue')}}
-            async function ddLogin(){const email=document.getElementById('ddLoginEmail').value.trim().toLowerCase();const password=document.getElementById('ddLoginPassword').value;const err=document.getElementById('ddLoginError');err.textContent='';const demo=DD_DEMO_ACCOUNTS[email];if(!demo){err.textContent='Account not found.';return}try{const hash=await ddHash(password);if(hash!==demo.passwordHash){err.textContent='Incorrect email or password.';return}const plan=demo.plan;ddSetAuth(email,plan,'');const s=ddGetSub();s.plan_type=plan;s.master_email=email;s.trial_start=s.trial_start||Date.now();s.expiry_date=s.expiry_date||ddExpiryFor(plan,s.trial_start);s.max_sub_users=DD_PLAN_LIMITS[plan];db.subscription=s;localStorage.setItem(DD_SUB_KEY,JSON.stringify(s));hideSubscriptionLock();document.getElementById('ddLoginOverlay').classList.remove('show');document.getElementById('licenseGate')?.classList.remove('show');updateSubscriptionUI();verifySubscriptionAccess(false);showToast('Signed in successfully');
-                    if(window.DD_FIREBASE_CONFIG?.projectId){const ok=await ddFirebaseInit();if(ok){try{const res=await window.DD_FB.signInWithEmailAndPassword(window.DD_FB.auth,email,password);db.cloud.uid=res.user.uid;db.cloud.email=res.user.email||email;db.cloud.enabled=true;db.subscription.master_uid=res.user.uid;saveDB();await ddCloudPull();await ddBindSession(res.user.uid)}catch(e){console.warn('Firebase sign-in unavailable; local demo session remains active',e);showToast('Local account active. Configure Firebase users for cloud sync.')}}}
-                }catch(e){err.textContent='Unable to sign in right now.'}}
-            async function signOutLocalSession(){try{if(window.DD_FB?.auth)await window.DD_FB.signOut(window.DD_FB.auth)}catch(e){}sessionStorage.removeItem(DD_SESSION_KEY);localStorage.removeItem(DD_AUTH_KEY);document.getElementById('subscriptionLock')?.classList.remove('show');document.getElementById('ddLoginOverlay')?.classList.add('show');}
+            /* ================= DD-FIX: MULTI-USER FOUNDATION (Stage A) — LIVE in Stage B-1 =================
+               Multi-user model: (1) MULTI-SHOP — every shop signs up with its own email and gets its own
+               shops/{shopId} workspace; (2) WITHIN A SHOP — users/{uid} carries {shopId, role} with
+               role 'owner' | 'manager' | 'cashier', all tied to the same shopId.
+               Stage B-1 wired the REAL Firebase project (digital-dokan-a669e) in as the built-in
+               DD_FIREBASE_CONFIG, so ddCloudEnabled() is now TRUE and Firebase Auth is the only login.
+               Business data syncs per shop via ddCloudPull/ddCloudPush (shops/{shopId}/data/main).
+               Remaining go-live steps (outside this file): deploy firestore.rules from the repo root,
+               then run the two-shop and two-device acceptance tests. */
+            function ddCloudEnabled(){return !!(window.DD_FIREBASE_CONFIG && window.DD_FIREBASE_CONFIG.projectId)}
+            function ddAuthMsg(text,isErr){const m=document.getElementById('ddAuthMsg');if(m){m.style.color=isErr?'#dc2626':'#059669';m.innerHTML=text}const e=document.getElementById('ddLoginError');if(e&&isErr)e.textContent='';if(e&&!isErr)e.textContent=''}
+            function ddNotEnabledMsg(){ddAuthMsg('Cloud accounts are not enabled yet. To get your account today, please <a href="https://wa.me/923257633875" target="_blank" rel="noopener">Book a Demo on WhatsApp</a> and our team will set up your shop.',true)}
+            function ddShowSignup(){if(!ddCloudEnabled()){ddNotEnabledMsg();return}document.getElementById('ddSignupFields').style.display='block';ddAuthMsg('Create your shop account. We will email you a verification link.',false)}
+            function ddShowLogin(){document.getElementById('ddSignupFields').style.display='none';ddAuthMsg('',false)}
+            async function ddEnsureFB(){if(!ddCloudEnabled())return false;const ok=await ddFirebaseInit();return !!(ok&&window.DD_FB&&window.DD_FB.auth)}
+            /* DD-FIX: resolve the signed-in user's shopId + role from users/{uid} BEFORE any shop data loads.
+               Result is kept in window.DD_SHOP_CTX and mirrored into db.cloud (tenantId/role) so later
+               Stage B sync code reads data only under that shopId. Returns null when no profile exists. */
+            async function ddResolveShop(uid){window.DD_SHOP_CTX=null;if(!uid||!window.DD_FB)return null;try{const snap=await window.DD_FB.getDoc(window.DD_FB.doc(window.DD_FB.fs,'users',uid));if(!snap.exists()){console.warn('DD-FIX: no users/{uid} profile for',uid);return null}const prof=snap.data();window.DD_SHOP_CTX={shopId:prof.shopId||'',role:prof.role||'cashier',name:prof.name||''};try{localStorage.setItem(DD_ACTIVE_SHOP_KEY,window.DD_SHOP_CTX.shopId)}catch(e){} /* DD-FIX (Stage B-1): remember the active shop so this device caches only this shop's data */ db.cloud.tenantId=window.DD_SHOP_CTX.shopId;db.cloud.role=window.DD_SHOP_CTX.role;try{const ssnap=await window.DD_FB.getDoc(window.DD_FB.doc(window.DD_FB.fs,'shops',window.DD_SHOP_CTX.shopId));if(ssnap.exists()){window.DD_SHOP_DOC=ssnap.data();ddApplyServerTrial(window.DD_SHOP_DOC)}}catch(e){console.warn('DD-FIX: shop doc load failed',e)}return window.DD_SHOP_CTX}catch(e){console.warn('DD-FIX: ddResolveShop failed',e);return null}}
+            /* DD-FIX: Server-side trial/subscription state (owner spec: signup -> 7-day free trial -> subscription).
+               ddApplyServerTrial mirrors shops/{shopId} trial fields into the local subscription object so the
+               EXISTING countdown pill (updateSubscriptionUI) and lock (verifySubscriptionAccess/showSubscriptionLock)
+               run on server truth, not on editable localStorage dates:
+               - trialEnd (or planExpiry when planStatus='active') becomes the local expiry_date;
+               - planStatus 'expired', or now > trialEnd with no active plan, forces expiry so day 8 locks the app;
+               - the last 2 trial days turn the header pill into a reminder (amber + "subscribe soon" wording).
+               Data is never deleted by this: the lock only blocks new entries (checkout already calls
+               verifySubscriptionAccess(true)); the records stay readable behind the lock message.
+               When Firebase is not configured this function is never called and the local demo flow is unchanged. */
+            function ddApplyServerTrial(shop){if(!shop)return;const sub=ddGetSub();const endMs=Number(shop.trialEnd||0)||(shop.trialStartMs?Number(shop.trialStartMs)+7*86400000:0);if(shop.trialStartMs)sub.trial_start=Number(shop.trialStartMs);if(shop.planStatus==='active'&&shop.planExpiry){sub.expiry_date=new Date(Number(shop.planExpiry)).toISOString();sub.plan_type=shop.planPaid==='yearly'?'yearly_package':'monthly_package'}else if(endMs){sub.expiry_date=new Date(endMs).toISOString();sub.plan_type='7_days_trial'}if(shop.planStatus==='expired'){sub.expiry_date=new Date(Date.now()-1000).toISOString()}db.subscription=sub;try{localStorage.setItem(DD_SUB_KEY,JSON.stringify(sub))}catch(e){}updateSubscriptionUI();const pill=document.getElementById('trialPill');if(pill&&shop.planStatus!=='active'){const left=Math.ceil((endMs-Date.now())/86400000);if(left<=2&&left>0){pill.style.background='#92400e';pill.textContent='Free Trial \u2022 '+left+' day'+(left===1?'':'s')+' left \u2014 subscribe soon to avoid a pause'}else if(left<=0){pill.style.background='#7f1d1d'}}}
+            /* DD-FIX: Sign Up — creates (in order) the Firebase Auth user, shops/{shopId}, users/{uid}.
+               Shop doc is created first with plan fixed to '7_days_trial' because firestore.rules only
+               allow that on create and never let shop users edit plan/trial fields afterwards.
+               A 7-day trial starts at createdAt; enforcement stays in ddGetSub for now (Stage B moves
+               trial dates server-side). */
+            async function ddSignUp(){if(!ddCloudEnabled()){ddNotEnabledMsg();return}const name=document.getElementById('ddSignupName').value.trim(),shopName=document.getElementById('ddSignupShop').value.trim(),email=document.getElementById('ddSignupEmail').value.trim().toLowerCase(),password=document.getElementById('ddSignupPassword').value;if(!name||!shopName||!email||password.length<6){ddAuthMsg('Please fill all fields and use a password of at least 6 characters.',true);return}if(!(await ddEnsureFB())){ddAuthMsg('Cloud sign-in is unavailable right now. Please try again later.',true);return}try{const res=await window.DD_FB.createUserWithEmailAndPassword(window.DD_FB.auth,email,password);const uid=res.user.uid;const shopId=id('shop');const now=Date.now();await window.DD_FB.setDoc(window.DD_FB.doc(window.DD_FB.fs,'shops',shopId),{shopName:shopName,ownerName:name,ownerUid:uid,ownerEmail:email,plan:'7_days_trial',planStatus:'trial',planPaid:null,planExpiry:null,trialStart:window.DD_FB.serverTimestamp(),trialStartMs:now,trialEnd:now+7*86400000,status:'trial',createdAt:now} /* DD-FIX: server-side trial state — trialStart is a server timestamp, trialEnd = +7 days, planStatus 'trial'|'active'|'expired', planPaid 'monthly'|'yearly'|null, planExpiry set only on owner approval. firestore.rules forbid shop users from editing any of these fields. */);await window.DD_FB.setDoc(window.DD_FB.doc(window.DD_FB.fs,'users',uid),{name:name,email:email,shopId:shopId,role:'owner',createdAt:now});try{await window.DD_FB.sendEmailVerification(res.user)}catch(e){console.warn('DD-FIX: verification email failed',e)}window.DD_SHOP_CTX={shopId:shopId,role:'owner',name:name};ddAuthMsg('Account created for '+esc(shopName)+'. Please check your email and click the verification link, then sign in.',false);ddShowLogin();document.getElementById('ddLoginEmail').value=email}catch(e){console.warn('DD-FIX: signup failed',e);ddAuthMsg('Could not create the account: '+(e&&e.message?e.message:'unknown error'),true)}}
+            /* DD-FIX: Forgot Password — Firebase Auth password-reset email. */
+            async function ddForgotPassword(){if(!ddCloudEnabled()){ddNotEnabledMsg();return}const email=document.getElementById('ddLoginEmail').value.trim().toLowerCase();if(!email){ddAuthMsg('Type your account email in the Email field above first, then tap Forgot password again.',true);return}if(!(await ddEnsureFB())){ddAuthMsg('Cloud sign-in is unavailable right now. Please try again later.',true);return}try{await window.DD_FB.sendPasswordResetEmail(window.DD_FB.auth,email);ddAuthMsg('Password reset email sent to '+esc(email)+'. Check your inbox.',false)}catch(e){console.warn('DD-FIX: password reset failed',e);ddAuthMsg('Could not send the reset email: '+(e&&e.message?e.message:'unknown error'),true)}}
+            /* DD-FIX: Staff accounts (owner adds manager/cashier to the SAME shopId).
+               Prepared shape: the owner records an invite at shops/{shopId}/staffInvites/{email}
+               {email, role, invitedBy, status:'invited', createdAt}. HOOK FOR GO-LIVE: a staff member
+               signs up with that email, and a Cloud Function (or the owner, from this panel) then writes
+               users/{staffUid} = {shopId: <owner shopId>, role: <invited role>}. Creating another user's
+               Auth account directly from the owner's browser session is NOT done here on purpose — it
+               needs the Firebase Admin SDK / Cloud Functions, which is a Firebase-stage task.
+               Plan sub-user limits (DD_PLAN_LIMITS) must be checked before inviting — see canCreateSubUser(). */
+            async function ddAddStaffInvite(email,role){if(!ddCloudEnabled()){ddNotEnabledMsg();return false}if(!(window.DD_SHOP_CTX&&window.DD_SHOP_CTX.role==='owner')){showToast('Only the shop owner can add staff');return false}role=['manager','cashier'].includes(role)?role:'cashier';email=String(email||'').trim().toLowerCase();if(!email)return false;if(!(await ddEnsureFB()))return false;try{await window.DD_FB.setDoc(window.DD_FB.doc(window.DD_FB.fs,'shops',window.DD_SHOP_CTX.shopId,'staffInvites',email),{email:email,role:role,invitedBy:window.DD_FB.auth.currentUser?window.DD_FB.auth.currentUser.uid:'',status:'invited',createdAt:Date.now()});showToast('Staff invite saved for '+email);return true}catch(e){console.warn('DD-FIX: staff invite failed',e);showToast('Could not save the staff invite');return false}}
+            /* ================= DD-FIX: end multi-user foundation ================= */
+            async function ddBindSession(uid){const s=ddGetSub();if(s.plan_type!=='7_days_trial'||!window.DD_FB)return;const shopId=(window.DD_SHOP_CTX&&window.DD_SHOP_CTX.shopId)||db.cloud?.tenantId||'';if(!shopId)return;const ref=window.DD_FB.doc(window.DD_FB.fs,'shops',shopId,'security','activeSession'); /* DD-FIX (Stage B-1): session doc moved under shops/{shopId} (was businesses/{tenant} — denied by firestore.rules; the generic subcollection rule covers shops/{shopId}/security/activeSession for members) */const token=ddSessionToken();await window.DD_FB.setDoc(ref,{token,uid,deviceId:ddDeviceId(),updatedAt:Date.now()},{merge:false}).catch(()=>{});if(window.__ddSessionUnsub)window.__ddSessionUnsub();try{const {onSnapshot}=await import('https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js');window.__ddSessionUnsub=onSnapshot(ref,snap=>{const r=snap.data();if(r?.token&&r.token!==ddSessionToken()&&r.uid===uid){document.getElementById('sessionWarning')?.classList.add('show');try{window.DD_FB.signOut(window.DD_FB.auth)}catch(e){};localStorage.removeItem(DD_AUTH_KEY);document.getElementById('ddLoginOverlay')?.classList.add('show');}})}catch(e){}}
+            /* ================= DD-FIX (Stage B-1): PER-SHOP CLOUD DATA LAYER =================
+               Design (chosen): the shop's whole business payload lives in ONE document per shop —
+               shops/{shopId}/data/main = { ownerUid, updatedAt, payload: <JSON string of db> }.
+               Why a single payload document: the app has always treated its data as one blob
+               (loadDB/saveDB), so every feature (POS, khata, inventory, HR, reports) keeps working
+               unchanged while gaining cloud sync, backup and per-shop isolation. The generic
+               subcollection rule in firestore.rules (members may get/list/create/update
+               shops/{shopId}/{collection}/{docId}) already covers data/main, so this design needed
+               NO rules change.
+               Offline ("Works offline" claim): ddFirebaseInit enables Firestore IndexedDB persistence
+               where the SDK supports it; the per-shop localStorage cache (ddCacheKey) is the always-on
+               fallback — saves write the cache first and queue a push; a failed/offline push is retried
+               on the next save, on the 'online' event, and on the next login. */
+            function ddShopDataRef(){const ctx=window.DD_SHOP_CTX;if(!ctx||!ctx.shopId||!window.DD_FB)return null;return window.DD_FB.doc(window.DD_FB.fs,'shops',ctx.shopId,'data','main')}
+            function ddCloudMeta(){const u=window.DD_FB?.auth?.currentUser;const ctx=window.DD_SHOP_CTX||{};return {projectId:'',tenantId:ctx.shopId||'',uid:u?.uid||'',email:u?.email||'',enabled:true,role:ctx.role||''}}
+            function ddLegacyCandidate(){
+                /* First-login import source: the pre-cloud local blob — only when no shop was ever active
+                   on this device (with an active shop, that blob is stale history, not this user's data). */
+                if(ddActiveShopId())return null;
+                let raw=null;try{raw=JSON.parse(localStorage.getItem(KEY)||'null')||JSON.parse(localStorage.getItem('digital_dokan_v3')||'null')}catch(e){}
+                if(!raw||typeof raw!=='object'||Array.isArray(raw))return null;
+                const n=(Array.isArray(raw.sales)?raw.sales.length:0)+(Array.isArray(raw.products)?raw.products.length:0)+(Array.isArray(raw.customers)?raw.customers.length:0);
+                return n>0?raw:null;
+            }
+            function ddCleanWorkspace(){
+                const clean=mergeDB({business:{...(db.business||{})},customers:[],products:[],sales:[],khata:[],purchases:[],expenses:[],employees:[],attendance:[],payrollAdjustments:[],branches:[{id:'main',name:'Main Branch',active:true}],subUsers:[]});
+                clean.invoice=1001;
+                if(window.DD_SHOP_DOC?.shopName)clean.business.name=window.DD_SHOP_DOC.shopName;
+                clean.cloud=ddCloudMeta();
+                clean.subscription=db.subscription;
+                return clean;
+            }
+            async function ddCloudPull(){
+                if(!window.DD_FB?.auth?.currentUser)return;
+                const ctx=window.DD_SHOP_CTX;
+                if(!ctx||!ctx.shopId){console.warn('DD-FIX: ddCloudPull called without a resolved shop — no data loaded');return}
+                const ref=ddShopDataRef();if(!ref)return;
+                try{
+                    const snap=await window.DD_FB.getDoc(ref);
+                    const raw=snap.exists()?snap.data()?.payload:null;
+                    if(raw){
+                        db=mergeDB(JSON.parse(raw));db.cloud=ddCloudMeta();saveDB();refresh();renderHR();renderBranches();updateSubscriptionUI();showToast('Cloud data loaded');return;
+                    }
+                    /* Empty cloud payload -> FIRST-LOGIN IMPORT (the "1-click data import" claim): offer the
+                       device's pre-cloud data once per shop; if declined (or none exists), start clean. */
+                    const cand=ddLegacyCandidate();
+                    if(cand&&!localStorage.getItem(DD_IMPORT_KEY+ctx.shopId)){
+                        const yes=confirm('We found your existing Digital Dokan data on this device (from before cloud accounts).\n\nImport it into your shop "'+(window.DD_SHOP_DOC?.shopName||'your shop')+'" now? This is a one-time import.');
+                        localStorage.setItem(DD_IMPORT_KEY+ctx.shopId,(yes?'imported:':'declined:')+Date.now());
+                        if(yes){db=mergeDB(cand);db.cloud=ddCloudMeta();saveDB();await ddCloudPush();refresh();renderHR();renderBranches();updateSubscriptionUI();showToast('Your existing data was imported into your shop');return}
+                    }
+                    db=ddCleanWorkspace();saveDB();await ddCloudPush();refresh();renderHR();renderBranches();updateSubscriptionUI();
+                }catch(e){console.warn(e);showToast('Cloud data could not be loaded \u2014 showing this device\u2019s copy')}
+            }
+            async function ddCloudPush(){
+                if(!window.DD_FB?.auth?.currentUser||!window.DD_SHOP_CTX?.shopId)return;
+                const ref=ddShopDataRef();if(!ref)return;
+                try{
+                    await window.DD_FB.setDoc(ref,{ownerUid:window.DD_FB.auth.currentUser.uid,updatedAt:Date.now(),payload:JSON.stringify(db)},{merge:false});
+                    document.getElementById('cloudStatus')&&(document.getElementById('cloudStatus').textContent='Cloud \u2022 Saved');
+                }catch(e){console.warn(e);document.getElementById('cloudStatus')&&(document.getElementById('cloudStatus').textContent='Cloud \u2022 Offline \u2014 will sync')}
+            }
+            async function ddLogin(){
+                /* DD-FIX (Stage B-1): Firebase Auth is the ONLY login. The hard-coded demo-account check is
+                   gone: sign in -> ddResolveShop (shopId + role + server trial state) -> ddCloudPull (this
+                   shop's data only). Email verification is NOT hard-blocking in this stage (owner policy
+                   decision, see stage-b1-report.md) — unverified users get a reminder, not a lockout. */
+                const email=document.getElementById('ddLoginEmail').value.trim().toLowerCase();
+                const password=document.getElementById('ddLoginPassword').value;
+                const err=document.getElementById('ddLoginError');err.textContent='';
+                if(!email||!password){err.textContent='Enter your email and password.';return}
+                if(!(await ddEnsureFB())){err.textContent='Cloud sign-in is unavailable right now. Please check your internet connection and try again.';return}
+                try{
+                    const res=await window.DD_FB.signInWithEmailAndPassword(window.DD_FB.auth,email,password);
+                    const user=res.user;
+                    db.cloud.uid=user.uid;db.cloud.email=user.email||email;db.cloud.enabled=true;
+                    ddSetAuth(user.email||email,'7_days_trial',user.uid);
+                    const ctx=await ddResolveShop(user.uid);
+                    if(!ctx||!ctx.shopId){
+                        err.textContent='This account has no shop workspace yet. If you just created it, wait a moment and sign in again \u2014 otherwise please contact support.';
+                        try{await window.DD_FB.signOut(window.DD_FB.auth)}catch(e){}
+                        localStorage.removeItem(DD_AUTH_KEY);return;
+                    }
+                    if(user.emailVerified===false)showToast('Welcome! Please verify your email when you can \u2014 we sent you a verification link.');
+                    await ddCloudPull();
+                    await ddBindSession(user.uid);
+                    hideSubscriptionLock();
+                    document.getElementById('ddLoginOverlay').classList.remove('show');
+                    document.getElementById('licenseGate')?.classList.remove('show');
+                    updateSubscriptionUI();verifySubscriptionAccess(false);
+                    showToast('Signed in successfully');
+                }catch(e){
+                    console.warn('DD-FIX: Firebase sign-in failed',e);
+                    const code=(e&&e.code)||'';
+                    err.textContent=(code==='auth/invalid-credential'||code==='auth/wrong-password'||code==='auth/user-not-found')?'Incorrect email or password.':code==='auth/too-many-requests'?'Too many sign-in attempts. Please wait a few minutes and try again.':code==='auth/network-request-failed'?'Network problem \u2014 check your internet connection and try again.':'Unable to sign in right now. Please try again.';
+                }
+            }
+            /* DD-FIX (Stage B-1): sign-out now enforces per-shop isolation on the device — the active
+               shop's cached payload is DELETED from this browser, so the next person who signs in on the
+               same device cannot see the previous shop's data. The cloud copy in Firestore is untouched,
+               and a fresh login re-downloads it via ddCloudPull. */
+            async function signOutLocalSession(){
+                const shopId=(window.DD_SHOP_CTX&&window.DD_SHOP_CTX.shopId)||ddActiveShopId();
+                try{if(window.__ddSessionUnsub)window.__ddSessionUnsub()}catch(e){}
+                try{if(window.DD_FB?.auth)await window.DD_FB.signOut(window.DD_FB.auth)}catch(e){}
+                if(shopId){try{localStorage.removeItem(ddCacheKey(shopId))}catch(e){}}
+                try{localStorage.removeItem(DD_ACTIVE_SHOP_KEY)}catch(e){}
+                window.DD_SHOP_CTX=null;window.DD_SHOP_DOC=null;
+                sessionStorage.removeItem(DD_SESSION_KEY);localStorage.removeItem(DD_AUTH_KEY);
+                document.getElementById('subscriptionLock')?.classList.remove('show');
+                document.getElementById('ddLoginOverlay')?.classList.add('show');
+                showToast('Signed out. This device no longer holds your shop data.');
+            }
             function hasAccess(){return !!ddAuth()&&verifySubscriptionAccess(false)}
             function updateAccessUI(){const gate=document.getElementById('licenseGate');if(gate)gate.classList.remove('show');const auth=ddAuth();if(!auth){document.getElementById('ddLoginOverlay')?.classList.add('show');return}document.getElementById('ddLoginOverlay')?.classList.remove('show');updateSubscriptionUI();verifySubscriptionAccess(false)}
+            /* DD-FIX (Stage B-1): Firebase restores sessions asynchronously — wait briefly for the auth
+               state before deciding the user is signed out. */
+            function ddWaitAuthUser(ms){return new Promise(res=>{let done=false;let unsub=null;const finish=u=>{if(done)return;done=true;clearTimeout(to);if(unsub)unsub();res(u||null)};const to=setTimeout(()=>finish(null),ms||3500);unsub=window.DD_FB.onAuthStateChanged(window.DD_FB.auth,finish)})}
             async function ddBoot(){
-                const a=ddAuth();if(a){document.getElementById('ddLoginEmail').value=a.email||'';document.getElementById('ddLoginOverlay')?.classList.remove('show');ddGetSub();updateSubscriptionUI();verifySubscriptionAccess(false);if(window.DD_FIREBASE_CONFIG?.projectId){const ok=await ddFirebaseInit();if(ok&&window.DD_FB.auth.currentUser){db.cloud.uid=window.DD_FB.auth.currentUser.uid;db.cloud.email=window.DD_FB.auth.currentUser.email||a.email;db.cloud.enabled=true;await ddCloudPull()}}}else document.getElementById('ddLoginOverlay')?.classList.add('show');
+                const a=ddAuth();
+                if(a){document.getElementById('ddLoginEmail').value=a.email||''}
+                if(ddCloudEnabled()){
+                    const ok=await ddFirebaseInit();
+                    if(ok){
+                        const user=window.DD_FB.auth.currentUser||await ddWaitAuthUser(3500);
+                        if(user){
+                            db.cloud.uid=user.uid;db.cloud.email=user.email||(a&&a.email)||'';db.cloud.enabled=true;
+                            document.getElementById('ddLoginOverlay')?.classList.remove('show');
+                            const ctx=await ddResolveShop(user.uid);
+                            if(ctx&&ctx.shopId){await ddCloudPull();await ddBindSession(user.uid);updateSubscriptionUI();verifySubscriptionAccess(false)}
+                            else document.getElementById('ddLoginOverlay')?.classList.add('show');
+                        }else{
+                            /* No live Firebase session — the local auth flag alone is not a login anymore. */
+                            localStorage.removeItem(DD_AUTH_KEY);
+                            document.getElementById('ddLoginOverlay')?.classList.add('show');
+                        }
+                    }else if(a){/* Firebase unreachable (e.g. offline first load): fall back to this device's cache for the previously signed-in shop. */ document.getElementById('ddLoginOverlay')?.classList.remove('show');ddGetSub();updateSubscriptionUI();verifySubscriptionAccess(false)}
+                }else if(a){document.getElementById('ddLoginOverlay')?.classList.remove('show');ddGetSub();updateSubscriptionUI();verifySubscriptionAccess(false)}
+                else document.getElementById('ddLoginOverlay')?.classList.add('show');
                 renderSubscriptionPanel();
             }
             // Trial invoice watermark: override the existing print function without changing the invoice layout.
