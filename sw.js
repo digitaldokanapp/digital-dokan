@@ -14,7 +14,7 @@
    ===================================================================== */
 'use strict';
 
-var DD_SW_VERSION = 'dd-20261113-v6';
+var DD_SW_VERSION = 'dd-20261113-v7';
 var DD_CACHE = 'digital-dokan-' + DD_SW_VERSION;
 
 /* App shell precached on install. All paths are relative to this
