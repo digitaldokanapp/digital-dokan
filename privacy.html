@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://digitaldokanapp.github.io/digital-dokan/og-cover.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Digital Dokan dashboard — POS billing, khata and stock for a Pakistani shop">
+  <meta property="og:image:alt" content="Digital Dokan dashboard — POS billing, khata and stock for a retail shop">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Privacy Policy | Digital Dokan">
   <meta name="twitter:description" content="How Digital Dokan handles your shop data: what is stored, where it is stored, and how to contact us.">
@@ -26,15 +26,49 @@
     :root{--dark:#080e0a;--green:#10b981;--paper:#f9fafb;--ink:#15231b;--muted:#607167}
     *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.7}a{color:#087f5b}.wrap{width:min(860px,calc(100% - 32px));margin:auto}header{background:var(--dark);color:#fff}.nav{height:76px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:10px;font-weight:850;color:#fff;text-decoration:none}.brand img{width:42px;height:42px;object-fit:contain;border-radius:10px;background:#071a12}.brand small{display:block;color:#9eb5a5;font-size:.62rem;font-weight:600}main{padding:48px 0 64px}h1{font-size:2.2rem;line-height:1.15;margin:0 0 8px}h2{font-size:1.25rem;margin:34px 0 8px}p,li{color:#33463a}.muted{color:var(--muted)}footer{background:var(--dark);color:#9eafa4;padding:28px 0;font-size:.85rem}footer a{color:#d4deea;text-decoration:none;margin-right:16px}
   </style>
-</head>
+<style>
+.uh-top{background:#07110b;color:#9eb5a5;font-size:12.5px;border-bottom:1px solid #1d2f24}
+.uh-topin{display:flex;justify-content:space-between;gap:14px;padding-top:7px;padding-bottom:7px;flex-wrap:wrap}
+.uh-top a{color:#cfe3d6;text-decoration:none;font-weight:600}.uh-topr{display:flex;gap:18px}
+.uh-head{background:#080e0a;border-bottom:1px solid #20372a;position:relative;z-index:30}
+.uh-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:76px}
+.uh-brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:850;text-decoration:none}
+.uh-brand img{width:42px;height:42px;object-fit:contain;border-radius:10px}
+.uh-brand small{display:block;color:#a7b5ad;font-size:10px;font-weight:600}
+.uh-links{display:none}
+@media(min-width:1024px){.uh-links{display:flex;gap:19px}.uh-hamb{display:none}}
+.uh-links a{color:#cfe3d6;font-size:13.5px;font-weight:600;text-decoration:none}.uh-links a:hover{color:#fff}
+.uh-actions{display:flex;gap:8px;align-items:center}
+.uh-btn{display:inline-flex;padding:10px 14px;border-radius:9px;font-weight:850;font-size:.8rem;text-decoration:none;white-space:nowrap}
+.uh-btno{background:transparent;color:#fff;border:1px solid #2b4234}
+.uh-btng{background:#10b981;color:#04150c}
+.uh-hamb{border:0;background:none;color:#fff;font-size:24px;cursor:pointer}
+.uh-menu{display:none;background:#0b2116;border-top:1px solid #20372a;padding:10px 18px}
+.uh-menu.open{display:block}
+.uh-menu a{display:block;padding:10px 0;color:#d4deea;font-weight:700;text-decoration:none}
+h1,h2,h3{font-weight:800}
+.uf{background:#080e0a;color:#c8d8ce;padding:48px 0 22px;border-top:1px solid #20372a}
+.uf-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px}
+.uf h4{color:#fff;margin:0 0 12px;font-size:.95rem}
+.uf a{display:block;margin:8px 0;color:#c8d8ce;font-size:.85rem;text-decoration:none}.uf a:hover{color:#fff}
+.uf p{color:#9eb5a5;font-size:.85rem;line-height:1.6}
+.uf-brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:850;margin:0 0 10px}
+.uf-brand img{width:42px;height:42px;object-fit:contain;border-radius:10px}
+.uf-brand small{display:block;color:#a7b5ad;font-size:10px;font-weight:600}
+.uf-type span{display:block;color:#9fb4a6;padding:3px 0;font-size:.8rem}
+.uf-copy{border-top:1px solid #263a2d;margin-top:28px;padding-top:18px;color:#9eb5a5;font-size:.75rem}
+@media(max-width:760px){.uf-grid{grid-template-columns:1fr 1fr;gap:24px 18px}.uf-grid>div:first-child,.uf-grid>div:last-child{grid-column:1/-1}.uh-nav{min-height:66px}}
+</style></head>
 <body>
-  <header><div class="wrap nav"><a class="brand" href="./index.html"><img src="./digital-dokan-icon.webp" alt="Digital Dokan"><span>Digital Dokan<small>Smart POS · Khata · Inventory</small></span></a><a href="./index.html" style="color:#d4deea;text-decoration:none;font-weight:700">← Back to Home</a></div></header>
+  <div class="uh-top"><div class="wrap uh-topin"><span>Smart POS • Khata • Inventory — for retail shops everywhere</span><span class="uh-topr"><a href="https://wa.me/923257633875" target="_blank" rel="noopener">WhatsApp: 0325 7633875</a><a href="mailto:dokanretailkhata@gmail.com">dokanretailkhata@gmail.com</a></span></div></div>
+<header class="uh-head"><div class="wrap uh-nav"><a class="uh-brand" href="./index.html"><img src="./digital-dokan-icon.webp" alt="Digital Dokan"><span>Digital Dokan<small>Smart POS • Khata • Inventory</small></span></a><nav class="uh-links"><a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./pricing.html">Pricing</a><a href="./compare.html">Compare</a><a href="./blog.html">Blog</a><a href="./about.html">About</a><a href="./contact.html">Contact</a></nav><div class="uh-actions"><a class="uh-btn uh-btno" href="./mydokan2.html">Log In</a><a class="uh-btn uh-btng" href="./mydokan2.html">Start Free Trial</a><button class="uh-hamb" aria-label="Open menu" onclick="uhToggle()">☰</button></div></div><div class="uh-menu" id="uhMenu"><a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./pricing.html">Pricing</a><a href="./compare.html">Compare</a><a href="./blog.html">Blog</a><a href="./about.html">About Us</a><a href="./contact.html">Contact Us</a><a href="./mydokan2.html">Log In</a></div></header>
+<script>function uhToggle(){document.getElementById('uhMenu').classList.toggle('open')}</script>
   <main class="wrap">
     <h1>Privacy Policy</h1>
     <p class="muted">Last updated: 11 November 2026</p>
 
     <h2>1. What Digital Dokan is</h2>
-    <p>Digital Dokan is point-of-sale (POS), customer Khata (credit ledger) and inventory software for small shops in Pakistan. This policy explains, in plain words, what happens to the information you enter into the software.</p>
+    <p>Digital Dokan is point-of-sale (POS), customer Khata (credit ledger) and inventory software for small shops. This policy explains, in plain words, what happens to the information you enter into the software.</p>
 
     <h2>2. Where your shop data is stored today</h2>
     <p><strong>Your shop data is stored on your own device.</strong> The current version of the app saves your products, customers, sales, Khata records, expenses and settings in your browser's local storage on the computer, tablet or phone you use. It is not uploaded to our servers.</p>
@@ -75,6 +109,6 @@
     <h2>9. Changes to this policy</h2>
     <p>If we change how data is stored or used — for example when cloud accounts launch — we will update this page and change the date at the top.</p>
   </main>
-  <footer><div class="wrap"><a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./pricing.html">Pricing</a><a href="./terms.html">Terms of Use</a><p>Copyright 2026 Digital Dokan. All rights reserved.</p></div></footer>
+  <footer class="uf"><div class="wrap"><div class="uf-grid"><div><a class="uf-brand" href="./index.html"><img src="./digital-dokan-icon.webp" alt="Digital Dokan"><span>Digital Dokan<small>Smart POS - Khata - Inventory</small></span></a><p>Simple retail software for modern businesses — POS billing, udhaar khata, stock and profit reports in one app.</p><a href="https://wa.me/923257633875" target="_blank" rel="noopener">WhatsApp Support</a><a href="mailto:dokanretailkhata@gmail.com">Email Us</a></div><div><h4>Quick Links</h4><a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./pricing.html">Pricing</a><a href="./compare.html">Compare</a><a href="./blog.html">Blog</a><a href="./mydokan2.html">Login</a><a href="./mydokan2.html">Open App</a></div><div><h4>Shop Types We Serve</h4><div class="uf-type"><span>Kiryana &amp; General Stores</span><span>Pharmacies &amp; Medical Stores</span><span>Garments &amp; Fashion Shops</span><span>Mobile &amp; Accessories Shops</span><span>Bakeries &amp; Sweet Shops</span><span>Wholesale &amp; Distribution</span></div></div><div><h4>Contact</h4><a href="mailto:dokanretailkhata@gmail.com">dokanretailkhata@gmail.com</a><a href="https://wa.me/923257633875" target="_blank" rel="noopener">WhatsApp: 0325 7633875</a><a href="./privacy.html">Privacy Policy</a><a href="./terms.html">Terms of Use</a></div></div><div class="uf-copy">Copyright 2026 Digital Dokan. All rights reserved.</div></div></footer>
 </body>
 </html>
