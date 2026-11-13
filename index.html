@@ -1632,7 +1632,8 @@
             .section.light .cap { color: #5b6f61 }
             @media (max-width: 860px) { .people { grid-template-columns: 1fr } }
             .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; margin: 0 auto 64px }
-            .split-row .feature-preview { width: 100%; margin: 0 }
+            .split-row .feature-preview { grid-column: auto; width: 100%; margin: 0; min-width: 0 }
+            .split-row > * { min-width: 0 }
             .split-row h3 { font-size: 26px; color: #fff; margin: 6px 0 10px }
             .cap { text-align: center; color: #9eb5a5; font-size: 12.5px; margin-top: 10px }
             .ticks { list-style: none; padding: 0; margin: 14px 0 0 }
