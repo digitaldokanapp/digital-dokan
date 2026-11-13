@@ -1004,13 +1004,13 @@
                 {
                     "@type": "Offer",
                     "name": "Pro Monthly",
-                    "price": "3000",
+                    "price": "2500",
                     "priceCurrency": "PKR"
                 },
                 {
                     "@type": "Offer",
                     "name": "Pro Yearly",
-                    "price": "27000",
+                    "price": "22500",
                     "priceCurrency": "PKR"
                 }
             ],
@@ -1058,7 +1058,7 @@
                     "name": "How much does Digital Dokan cost? Is there a free trial?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "The 7-day trial is completely free for up to 50 items — no card needed. Pro is Rs. 3,000 per month, or Rs. 27,000 per year (you save Rs. 9,000). One plan includes every feature; there are no per-feature charges."
+                        "text": "The 7-day trial is completely free for up to 50 items — no card needed. Pro is Rs. 2,500 per month, or Rs. 22,500 per year (you save Rs. 7,500). One plan includes every feature; there are no per-feature charges."
                     }
                 },
                 {
@@ -1066,7 +1066,7 @@
                     "name": "How can I pay for the monthly or yearly package via EasyPaisa or JazzCash?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Choose your plan on this page, send the payment to the EasyPaisa / NayaPay or JazzCash number shown, and send your receipt on WhatsApp or email. Your plan is activated after a quick manual verification."
+                        "text": "Tap the button on your plan to talk to us on WhatsApp (0325 7633875). Pay via EasyPaisa, NayaPay or JazzCash and send your receipt in the same chat — your plan is activated after a quick verification."
                     }
                 },
                 {
@@ -1083,6 +1083,14 @@
                     "acceptedAnswer": {
                         "@type": "Answer",
                         "text": "Every shop has its own account and completely separate data — one shop can never see another shop's records. Your data is saved on your device and backed up to the cloud, and signing out clears the copy on that device."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can I use Digital Dokan outside Pakistan?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. Digital Dokan is a web app, so it works in any country on your phone, tablet or computer — billing, khata, stock and reports work the same everywhere. Prices are shown in Pakistani Rupees; if you are outside Pakistan, message us on WhatsApp (0325 7633875) and we will guide you with a plan and payment from your country."
                     }
                 },
                 {
@@ -1596,6 +1604,25 @@
             .cta-band { text-align: center }
             .cta-band .actions { justify-content: center }
         </style>
+            <style>
+            /* Homepage v2 additions: center nav, facts strip, NEW tags, payment note, footer cities */
+            .nav-center { display: none }
+            @media (min-width: 1024px) {
+                .nav-center { display: flex; gap: 26px; align-items: center }
+                .nav-center a { color: #cfe3d6; font-weight: 600; font-size: 14px; text-decoration: none }
+                .nav-center a:hover { color: #fff }
+            }
+            .facts-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px }
+            .fact { text-align: center }
+            .fact b { display: block; color: #fff; font-size: 20px; margin-bottom: 2px }
+            .fact span { color: #9eb5a5; font-size: 12.5px }
+            @media (max-width: 720px) { .facts-strip { grid-template-columns: 1fr 1fr } }
+            .new-tag { display: inline-block; background: #0aa977; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: .08em; padding: 3px 8px; border-radius: 999px; margin-bottom: 10px }
+            .pay-note { margin-top: 26px; border: 1px solid #263a2d; background: #0a140d; border-radius: 14px; padding: 16px 18px; color: #cfe3d6; font-size: 14.5px; text-align: center }
+            .footer-grid span.city { display: block; color: #9fb4a6; padding: 3px 0; font-size: .8rem }
+            .cta-band { text-align: center }
+            .cta-band .actions { justify-content: center }
+        </style>
     </head>
     <body>
         <header>
@@ -1659,7 +1686,7 @@
                 <div class="wrap">
                     <div class="facts-strip">
                         <div class="fact"><b>7-Day</b><span>Free trial, no card needed</span></div>
-                        <div class="fact"><b>Rs. 3,000/mo</b><span>One simple Pro plan</span></div>
+                        <div class="fact"><b>Rs. 2,500/mo</b><span>One simple Pro plan</span></div>
                         <div class="fact"><b>Offline Mode</b><span>Billing never stops</span></div>
                         <div class="fact"><b>WhatsApp</b><span>Bills, khata &amp; support</span></div>
                     </div>
@@ -1930,7 +1957,7 @@
                 </div>
             </section>
 
-            <section id="pricing" class="section dark">
+            <section id="pricing" class="section light">
                 <div class="wrap">
                     <div class="section-intro">
                         <span class="eyebrow">Pricing</span>
@@ -1953,7 +1980,7 @@
                         <article class="price-card featured">
                             <span class="badge">MOST POPULAR</span>
                             <h3>Pro Monthly</h3>
-                            <div class="price">Rs. 3,000</div>
+                            <div class="price">Rs. 2,500</div>
                             <small class="muted">per month</small>
                             <ul>
                                 <li>Unlimited Items &amp; Customers</li>
@@ -1963,24 +1990,24 @@
                                 <li>Galla &amp; Profit Reports</li>
                                 <li>Staff Logins with Roles</li>
                             </ul>
-                            <button class="btn btn-green" style="width:100%" onclick="openPayment('Pro Monthly','Rs. 3,000 / month')">Get Started</button>
+                            <a class="btn btn-green" style="width:100%" href="https://wa.me/923257633875?text=Assalam-o-Alaikum%2C%20mujhe%20Digital%20Dokan%20ka%20Pro%20Monthly%20plan%20(Rs.%202%2C500%2Fmonth)%20chahiye" target="_blank" rel="noopener">Get Started on WhatsApp</a>
                         </article>
                         <article class="price-card">
                             <span class="badge">BEST VALUE</span>
                             <h3>Pro Yearly</h3>
-                            <div class="price">Rs. 27,000</div>
-                            <small class="muted">per year — Save Rs. 9,000</small>
+                            <div class="price">Rs. 22,500</div>
+                            <small class="muted">per year — Save Rs. 7,500</small>
                             <ul>
                                 <li>Everything in Pro Monthly</li>
                                 <li>Your Shop Logo Branding</li>
                                 <li>Priority WhatsApp Support</li>
                                 <li>All New Features Included</li>
                             </ul>
-                            <button class="btn btn-green" style="width:100%" onclick="openPayment('Pro Yearly','Rs. 27,000 / year')">Choose Yearly</button>
+                            <a class="btn btn-green" style="width:100%" href="https://wa.me/923257633875?text=Assalam-o-Alaikum%2C%20mujhe%20Digital%20Dokan%20ka%20Pro%20Yearly%20plan%20(Rs.%2022%2C500%2Fyear)%20chahiye" target="_blank" rel="noopener">Choose Yearly on WhatsApp</a>
                         </article>
                     </div>
                     <div class="pay-note">
-                        <b>Easy payment:</b> Pay via EasyPaisa, NayaPay or JazzCash, then send your receipt on WhatsApp or email — your plan activates after a quick verification. No credit card, no hidden charges.
+                        <b>Talk to us first:</b> Tap any plan to chat on WhatsApp — <b>0325 7633875</b> — and we will set everything up with you. Pay easily via EasyPaisa, NayaPay or JazzCash and send your receipt in the same chat; your plan activates after a quick verification. <b>Outside Pakistan?</b> Digital Dokan works in any country — message us on WhatsApp for international plans.
                     </div>
                 </div>
             </section>
@@ -2019,13 +2046,13 @@
                         <button aria-expanded="false">
                             How much does Digital Dokan cost? Is there a free trial? <i data-lucide="plus"></i>
                         </button>
-                        <p>The 7-day trial is completely free for up to 50 items — no card needed. Pro is Rs. 3,000 per month, or Rs. 27,000 per year (you save Rs. 9,000). One plan includes every feature; there are no per-feature charges.</p>
+                        <p>The 7-day trial is completely free for up to 50 items — no card needed. Pro is Rs. 2,500 per month, or Rs. 22,500 per year (you save Rs. 7,500). One plan includes every feature; there are no per-feature charges.</p>
                     </div>
                     <div class="faq">
                         <button aria-expanded="false">
                             How can I pay for the monthly or yearly package via EasyPaisa or JazzCash? <i data-lucide="plus"></i>
                         </button>
-                        <p>Choose your plan on this page, send the payment to the EasyPaisa / NayaPay or JazzCash number shown, and send your receipt on WhatsApp or email. Your plan is activated after a quick manual verification.</p>
+                        <p>Tap the button on your plan to talk to us on WhatsApp (0325 7633875). Pay via EasyPaisa, NayaPay or JazzCash and send your receipt in the same chat — your plan is activated after a quick verification.</p>
                     </div>
                     <div class="faq">
                         <button aria-expanded="false">
@@ -2038,6 +2065,12 @@
                             Is my shop's data safe? I run more than one shop. <i data-lucide="plus"></i>
                         </button>
                         <p>Every shop has its own account and completely separate data — one shop can never see another shop's records. Your data is saved on your device and backed up to the cloud, and signing out clears the copy on that device.</p>
+                    </div>
+                    <div class="faq">
+                        <button aria-expanded="false">
+                            Can I use Digital Dokan outside Pakistan? <i data-lucide="plus"></i>
+                        </button>
+                        <p>Yes. Digital Dokan is a web app, so it works in any country on your phone, tablet or computer — billing, khata, stock and reports work the same everywhere. Prices are shown in Pakistani Rupees; if you are outside Pakistan, message us on WhatsApp (0325 7633875) and we will guide you with a plan and payment from your country.</p>
                     </div>
                     <div class="faq">
                         <button aria-expanded="false">
