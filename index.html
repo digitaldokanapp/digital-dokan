@@ -1623,6 +1623,43 @@
             .cta-band { text-align: center }
             .cta-band .actions { justify-content: center }
         </style>
+            <style>
+            /* Homepage v2 additions: center nav, facts strip, NEW tags, payment note, footer cities */
+            .nav-center { display: none }
+            @media (min-width: 1024px) {
+                .nav-center { display: flex; gap: 26px; align-items: center }
+                .nav-center a { color: #cfe3d6; font-weight: 600; font-size: 14px; text-decoration: none }
+                .nav-center a:hover { color: #fff }
+            }
+            .facts-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px }
+            .fact { text-align: center }
+            .fact b { display: block; color: #fff; font-size: 20px; margin-bottom: 2px }
+            .fact span { color: #9eb5a5; font-size: 12.5px }
+            @media (max-width: 720px) { .facts-strip { grid-template-columns: 1fr 1fr } }
+            .new-tag { display: inline-block; background: #0aa977; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: .08em; padding: 3px 8px; border-radius: 999px; margin-bottom: 10px }
+            .pay-note { margin-top: 26px; border: 1px solid #263a2d; background: #0a140d; border-radius: 14px; padding: 16px 18px; color: #cfe3d6; font-size: 14.5px; text-align: center }
+            .footer-grid span.city { display: block; color: #9fb4a6; padding: 3px 0; font-size: .8rem }
+            .cta-band { text-align: center }
+            .card { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease }
+            .card:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(0,0,0,.35); border-color: #10b981 }
+            .price-card { transition: transform .25s ease, box-shadow .25s ease }
+            .price-card:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(2,44,30,.20) }
+            .slides { position: relative; aspect-ratio: 1351/639; overflow: hidden; border-radius: 14px }
+            .slides img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: heroFade 18s infinite }
+            .slides img.s2 { animation-delay: 6s }
+            .slides img.s3 { animation-delay: 12s }
+            @keyframes heroFade { 0% { opacity: 0; transform: scale(1.02) } 5% { opacity: 1 } 33% { opacity: 1 } 39% { opacity: 0; transform: scale(1.07) } 100% { opacity: 0; transform: scale(1.07) } }
+            @media (prefers-reduced-motion: reduce) { .slides img { animation: none } .slides img.s1 { opacity: 1 } }
+            .split-row { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: center; margin: 0 auto 64px }
+            .split-row .feature-preview { width: 100%; margin: 0 }
+            .split-row h3 { font-size: 26px; color: #fff; margin: 6px 0 10px }
+            .cap { text-align: center; color: #9eb5a5; font-size: 12.5px; margin-top: 10px }
+            .ticks { list-style: none; padding: 0; margin: 14px 0 0 }
+            .ticks li { padding: 6px 0 6px 26px; position: relative; color: #cfe3d6 }
+            .ticks li::before { content: "¹3"; position: absolute; left: 0; color: #10b981; font-weight: 800 }
+            @media (max-width: 860px) { .split-row { grid-template-columns: 1fr; gap: 22px; margin-bottom: 44px } }
+            .cta-band .actions { justify-content: center }
+        </style>
     </head>
     <body>
         <header>
@@ -1675,8 +1712,12 @@
                             <div class="muted hero-proof">✓ No Credit Card Required · ✓ Works Without Internet · ✓ Easy Setup in 2 Mins</div>
                         </div>
                         <figure>
-                            <img src="./dashboard-hero-attached.png" alt="Digital Dokan POS software dashboard for a Pakistani shop with sales, khata and stock overview" width="1351" height="639">
-                            <figcaption class="sr-only">Digital Dokan dashboard preview with navigation, sales metrics and business snapshot.</figcaption>
+                            <div class="slides">
+                                <img class="s1" src="./dashboard-hero-attached.png" alt="Digital Dokan POS software dashboard for a Pakistani shop with sales, khata and stock overview" width="1351" height="639">
+                                <img class="s2" src="./quick-billing-attached.png" alt="Quick billing screen of Digital Dokan point of sale software" loading="lazy" width="1354" height="641">
+                                <img class="s3" src="./sales-invoices-latest.png" alt="Sales invoices and customer khata history in Digital Dokan" loading="lazy" width="1350" height="637">
+                            </div>
+                            <figcaption class="sr-only">Digital Dokan screens: dashboard, quick billing and sales invoices with khata history.</figcaption>
                         </figure>
                     </div>
                 </div>
@@ -1731,6 +1772,16 @@
                             <h3>Bakeries &amp; Food Shops</h3>
                             <p class="muted">Daily fresh stock with expiry alerts and fast counter billing at rush hour. Ready bakery catalogue of 35 items to begin with.</p>
                         </article>
+                        <article class="card">
+                            <span class="icon"><i data-lucide="store"></i></span>
+                            <h3>Supermarkets &amp; Mini Marts</h3>
+                            <p class="muted">Shelf-by-shelf stock, fast checkout billing and expiry alerts for packaged food — built for high daily footfall and long item lists.</p>
+                        </article>
+                        <article class="card">
+                            <span class="icon"><i data-lucide="hammer"></i></span>
+                            <h3>Hardware, Paint &amp; Sanitary</h3>
+                            <p class="muted">Thousands of small parts made searchable: stock by item and brand, supplier purchases, and customer udhaar for contractors and workshops.</p>
+                        </article>
                     </div>
                 </div>
             </section>
@@ -1772,6 +1823,16 @@
                             <span class="icon"><i data-lucide="trending-up"></i></span>
                             <h3>Daily Profit &amp; Expense</h3>
                             <p class="muted">Rozana ki kamai, kharcha aur munafa khud-ba-khud calculate karein — real profit after purchase costs and expenses, not just sales totals.</p>
+                        </article>
+                        <article class="card">
+                            <span class="icon"><i data-lucide="printer"></i></span>
+                            <h3>Thermal Receipt Printing</h3>
+                            <p class="muted">Crisp bills on 58mm and 80mm thermal printers — and A4 when you need it — with your own shop name and logo on every receipt.</p>
+                        </article>
+                        <article class="card">
+                            <span class="icon"><i data-lucide="truck"></i></span>
+                            <h3>Purchases &amp; Supplier Ledger</h3>
+                            <p class="muted">Record supplier purchases and payments in the same place, so stock, kharcha and supplier balances never drift apart.</p>
                         </article>
                     </div>
                     <p style="text-align:center;margin-top:28px"><a class="btn btn-outline" href="./features.html">Explore All Features <i data-lucide="arrow-up-right" width="16"></i></a></p>
@@ -1842,22 +1903,56 @@
                 <div class="wrap">
                     <div class="section-intro">
                         <span class="eyebrow">See It in Action</span>
-                        <h2 class="section-title">Billing, Invoices and Reports — Clear on Every Screen</h2>
-                        <p class="muted">Simple English labels, big buttons and readable records on counter PC, tablet and mobile.</p>
+                        <h2 class="section-title">Made for Real Counters, Real Customers, Real Profit</h2>
+                        <p class="muted">From the morning rush to the day-end galla count — this is how a shop runs on Digital Dokan.</p>
                     </div>
-                    <div class="gallery">
+                    <div class="split-row">
                         <figure class="feature-preview">
-                            <img src="./quick-billing-attached.png" alt="Quick POS billing screen of Digital Dokan billing software for kiryana and general stores" loading="lazy" width="1354" height="641">
-                            <figcaption class="sr-only">Quick billing screen for fast counter sales.</figcaption>
+                            <img src="./home-billing.jpg" alt="Shopkeeper scanning a barcode at a modern retail checkout using POS billing software" loading="lazy" width="1200" height="800">
+                            <figcaption class="cap">Fast counter billing, anywhere in the world</figcaption>
                         </figure>
+                        <div>
+                            <span class="eyebrow">Quick Billing</span>
+                            <h3>Billing that keeps the queue moving</h3>
+                            <p class="muted">Scan a barcode or search by name and the bill is ready in seconds — on your counter PC, a tablet, or the phone in your pocket.</p>
+                            <ul class="ticks">
+                                <li>Barcode scanner, camera scan or quick search</li>
+                                <li>Hold one bill, serve the next customer, come back anytime</li>
+                                <li>Thermal receipts on 58mm and 80mm printers</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="split-row">
+                        <div>
+                            <span class="eyebrow">Khata &amp; WhatsApp</span>
+                            <h3>Khata your customers can see — and trust</h3>
+                            <p class="muted">No more register disputes. Your customer sees the same record you do, so payments come back faster and relationships stay friendly.</p>
+                            <ul class="ticks">
+                                <li>Bills and khata statements on WhatsApp in one tap</li>
+                                <li>Mera Khata link — customers check their own balance anytime</li>
+                                <li>Wasooli list with promise dates and credit limits</li>
+                            </ul>
+                        </div>
                         <figure class="feature-preview">
-                            <img src="./sales-invoices-latest.png" alt="Sales invoices and customer udhaar khata history in Digital Dokan khata software" loading="lazy" width="1350" height="637">
-                            <figcaption class="sr-only">Sales invoices with customer khata history.</figcaption>
+                            <img src="./home-khata.jpg" alt="Shopkeeper showing a customer their digital khata record on a smartphone inside a modern grocery shop" loading="lazy" width="1200" height="800">
+                            <figcaption class="cap">Digital khata, shared with a smile</figcaption>
                         </figure>
+                    </div>
+                    <div class="split-row">
                         <figure class="feature-preview">
-                            <img src="./business-reports-attached.png" alt="Daily profit, galla and expense reports in Digital Dokan shop management software" loading="lazy" width="1066" height="641">
-                            <figcaption class="sr-only">Business reports with profit and expenses.</figcaption>
+                            <img src="./home-reports.jpg" alt="Shop owner reviewing daily sales and profit charts on a laptop in his store" loading="lazy" width="1200" height="800">
+                            <figcaption class="cap">Reports that show the real picture</figcaption>
                         </figure>
+                        <div>
+                            <span class="eyebrow">Galla &amp; Munafa</span>
+                            <h3>Know your real munafa, every single day</h3>
+                            <p class="muted">Sales alone do not tell the truth. Digital Dokan counts your cash drawer, subtracts purchase costs and expenses, and shows the profit that is actually yours.</p>
+                            <ul class="ticks">
+                                <li>Galla count matched against expected cash at day-close</li>
+                                <li>Profit after costs and expenses — not just sales totals</li>
+                                <li>Today, this week or the full month in one click</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1970,10 +2065,10 @@
                             <div class="price">Rs. 0</div>
                             <small class="muted">7 days</small>
                             <ul>
-                                <li>POS Billing</li>
-                                <li>Customer Khata</li>
-                                <li>Up to 50 Items</li>
-                                <li>Basic Sales Tracking</li>
+                                <li>All Pro features for 7 days</li>
+                                <li>Up to 50 items</li>
+                                <li>POS billing &amp; customer khata</li>
+                                <li>No card needed</li>
                             </ul>
                             <button class="btn btn-dark" style="width:100%" onclick="window.location.href='./mydokan2.html'">Start Free</button>
                         </article>
@@ -1983,12 +2078,21 @@
                             <div class="price">Rs. 2,500</div>
                             <small class="muted">per month</small>
                             <ul>
-                                <li>Unlimited Items &amp; Customers</li>
-                                <li>WhatsApp Bills &amp; Reminders</li>
-                                <li>Low-Stock &amp; Expiry Alerts</li>
-                                <li>Thermal Printing (58mm / 80mm)</li>
-                                <li>Galla &amp; Profit Reports</li>
-                                <li>Staff Logins with Roles</li>
+                                <li>Unlimited items &amp; customers</li>
+                                <li>Quick billing with barcode scanner</li>
+                                <li>Digital udhaar khata &amp; full history</li>
+                                <li>WhatsApp bills, statements &amp; reminders</li>
+                                <li>Mera Khata customer link</li>
+                                <li>Wasooli list, promise dates &amp; credit limits</li>
+                                <li>Inventory with low-stock alerts</li>
+                                <li>Expiry &amp; batch alerts</li>
+                                <li>Thermal printing (58mm / 80mm) &amp; barcode labels</li>
+                                <li>Hold bills, % discounts &amp; easy returns</li>
+                                <li>Galla day-close &amp; Munafa profit reports</li>
+                                <li>Expenses &amp; supplier purchases</li>
+                                <li>Ready starter catalogues &amp; CSV import</li>
+                                <li>Staff logins with roles</li>
+                                <li>Offline mode &amp; cloud backup</li>
                             </ul>
                             <a class="btn btn-green" style="width:100%" href="https://wa.me/923257633875?text=Assalam-o-Alaikum%2C%20mujhe%20Digital%20Dokan%20ka%20Pro%20Monthly%20plan%20(Rs.%202%2C500%2Fmonth)%20chahiye" target="_blank" rel="noopener">Get Started on WhatsApp</a>
                         </article>
@@ -1999,9 +2103,9 @@
                             <small class="muted">per year — Save Rs. 7,500</small>
                             <ul>
                                 <li>Everything in Pro Monthly</li>
-                                <li>Your Shop Logo Branding</li>
-                                <li>Priority WhatsApp Support</li>
-                                <li>All New Features Included</li>
+                                <li>Your shop logo branding</li>
+                                <li>Priority WhatsApp support</li>
+                                <li>All new features included first</li>
                             </ul>
                             <a class="btn btn-green" style="width:100%" href="https://wa.me/923257633875?text=Assalam-o-Alaikum%2C%20mujhe%20Digital%20Dokan%20ka%20Pro%20Yearly%20plan%20(Rs.%2022%2C500%2Fyear)%20chahiye" target="_blank" rel="noopener">Choose Yearly on WhatsApp</a>
                         </article>
