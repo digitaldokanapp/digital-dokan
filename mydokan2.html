@@ -332,6 +332,42 @@
                 font-size: 12px
             }
 
+            /* DD-FOOTER: match the website (index.html) footer — centered 1160px wrap + website brand block */
+            .app-footer-wrap {
+                width: min(1160px,100%);
+                margin: 0 auto
+            }
+
+            .app-footer .brand {
+                padding: 0;
+                border-bottom: none;
+                text-decoration: none
+            }
+
+            .app-footer .brand .mark {
+                width: 42px;
+                height: 42px;
+                flex: none;
+                display: block;
+                object-fit: contain;
+                border-radius: 10px;
+                background: #071a12
+            }
+
+            .app-footer .brand span {
+                color: #fff;
+                font-size: 18px;
+                font-weight: 800;
+                line-height: 1.25
+            }
+
+            .app-footer .brand small {
+                display: block;
+                color: #9eb5a5;
+                font-size: 11px;
+                font-weight: 600
+            }
+
             .grid {
                 display: grid;
                 gap: 16px
@@ -2670,34 +2706,38 @@
         <!-- PRINT AREA -->
         <div class="print-area" id="printArea"></div>
         <footer class="app-footer bg-[#080E0A] text-gray-300 border-t border-emerald-950/60 py-12 px-6">
-            <div class="app-footer-grid">
-                <div>
-                    <a class="brand" href="./index.html">
-                        <span class="logo"><img src="./digital-dokan-icon.webp" alt="Digital Dokan"></span>
-                        <span>
-                            <b style="color:#fff;font-size:18px">Digital Dokan</b>
-                            <small style="display:block;color:#34d399">Smart POS • Khata • Inventory</small>
-                        </span>
-                    </a>
-                    <p>Simple retail software for Pakistani businesses.</p>
+            <div class="app-footer-wrap">
+                <div class="app-footer-grid">
+                    <div>
+                        <a class="brand" href="./index.html">
+                            <img class="mark" src="./digital-dokan-icon.webp" alt="Digital Dokan" width="768" height="768">
+                            <span>
+                                Digital Dokan<small>Smart POS - Khata - Inventory</small>
+                            </span>
+                        </a>
+                        <p>Simple retail software for Pakistani businesses.</p>
+                    </div>
+                    <div>
+                        <h4>Product</h4>
+                        <a href="./index.html">Home</a>
+                        <a href="./features.html">Features</a>
+                        <a href="./pricing.html">Pricing</a>
+                        <a href="./compare.html">Compare</a>
+                    </div>
+                    <div>
+                        <h4>Company</h4>
+                        <a href="./about.html">About Us</a>
+                        <a href="./contact.html">Contact Us</a>
+                    </div>
+                    <div>
+                        <h4>Support</h4>
+                        <a href="mailto:dokanretailkhata@gmail.com">dokanretailkhata@gmail.com</a>
+                        <a href="./privacy.html">Privacy Policy</a>
+                        <a href="./terms.html">Terms of Use</a>
+                    </div>
                 </div>
-                <div>
-                    <h4>Product</h4>
-                    <a href="./index.html#features">Features</a>
-                    <a href="./index.html#pricing">Pricing</a>
-                    <a href="./mydokan2.html">Open App</a>
-                </div>
-                <div>
-                    <h4>Company</h4>
-                    <a href="./about.html">About Us</a>
-                    <a href="./contact.html">Contact Us</a>
-                </div>
-                <div>
-                    <h4>Support</h4>
-                    <a href="mailto:dokanretailkhata@gmail.com" style="color:#34d399">dokanretailkhata@gmail.com</a>
-                </div>
+                <div class="copyright">Copyright 2026 Digital Dokan. All rights reserved.</div>
             </div>
-            <div class="copyright">© 2026 Digital Dokan. All rights reserved.</div>
         </footer>
         <script>
             // Authentication is handled by the Digital Dokan account gate below.
