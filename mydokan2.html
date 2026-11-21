@@ -6175,7 +6175,7 @@
                     }
                     ['placeholder','title','aria-label'].forEach(a=>{
                         if(el.hasAttribute(a)){
-                            const key='__dd_'+a;
+                            const key='__dd_'+a.replace(/-/g,'_');
                             if(!el.dataset[key])el.dataset[key]=el.getAttribute(a);
                             const en=el.dataset[key]; if(lang==='ur')el.setAttribute(a,DD_URDU[en]||en); else el.setAttribute(a,en);
                         }
