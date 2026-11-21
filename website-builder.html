@@ -48,15 +48,6 @@ textarea.tall{min-height:150px}
 .count{font-size:.8rem;color:var(--muted);font-weight:400}
 a{color:#087f5b}
 code{background:#eef2ee;padding:2px 6px;border-radius:5px}
-.tplgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin:14px 0}
-.tplcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
-.tplcard.sel{border-color:var(--green);box-shadow:0 0 0 2px var(--green)}
-.pvwrap{height:280px;overflow:hidden;background:#e9efe9;border-bottom:1px solid var(--line)}
-.pvwrap iframe{width:1200px;height:1600px;border:0;transform:scale(.235);transform-origin:0 0;pointer-events:none}
-.tplcard .tc{padding:12px 14px}
-.tplcard .tc b{display:block;margin-bottom:3px}
-.tplcard .tc span{color:var(--muted);font-size:.87rem;line-height:1.45;display:block;margin-bottom:10px}
-#livePrev{width:100%;height:640px;border:1px solid var(--line);border-radius:12px;background:#fff}
 </style>
 </head>
 <body>
@@ -74,8 +65,13 @@ Key banane ke liye: <a href="https://github.com/settings/personal-access-tokens/
 
 <div class="panel">
 <h2>Step 2 — Page Banayein</h2>
-<p class="hint">Neeche <b>Template Gallery</b> se apni pasand ka design chunein — har template ki <b>preview</b> dikhti hai aur content pehle se bhara hota hai, aap bas apna text aur tasveer badlein. Structure badalna ho to blocks ko <b>upar/neeche</b> karein, naya block jorein ya hata dein. Neeche <b>Live Preview</b> mein page sath sath banta hua dikhega — bilkul WordPress ki tarah.</p>
-<div class="tplgal" id="tplGal"></div>
+<p class="hint">Pehle template chunein, phir khane bharein. Structure badalna ho to blocks ko <b>upar/neeche</b> karein, naya block jorein ya hata dein — bilkul WordPress ki tarah.</p>
+<div class="tpl" id="tplRow">
+<button data-tpl="blog" onclick="pickTpl('blog')"><b>Blog Article</b><span>Guide wali post — intro, numbered tips, message box, sawal-jawab, akhri card</span></button>
+<button data-tpl="guide" onclick="pickTpl('guide')"><b>Guide Page</b><span>Cards + steps + FAQ wala maloomati page</span></button>
+<button data-tpl="info" onclick="pickTpl('info')"><b>Info / Service Page</b><span>Cards + text + FAQ wala aam page</span></button>
+<button data-tpl="blank" onclick="pickTpl('blank')"><b>Blank Page</b><span>Sirf hero aur text — baqi khud jorein</span></button>
+</div>
 
 <div class="grid2">
 <div><label>Page ki qisam</label><select id="pType"><option value="page">Normal Page</option><option value="blog">Blog Post</option></select></div>
@@ -91,7 +87,6 @@ Key banane ke liye: <a href="https://github.com/settings/personal-access-tokens/
 <input type="text" id="pH1" placeholder="Page ki sab se bari heading">
 <label>Shuru ka paragraph (hero ke neeche)</label>
 <textarea id="pIntro" placeholder="Pehla paragraph jo heading ke neeche ayega"></textarea>
-<label style="font-weight:400"><input type="checkbox" id="pBare" style="width:auto"> <b>Landing mode</b> — page se website wala header/footer hata dein (saaf landing page ke liye)</label>
 
 <div id="blogFields" style="display:none">
 <label>Blog card ka text (blog page par dikhega)</label>
@@ -112,17 +107,11 @@ Key banane ke liye: <a href="https://github.com/settings/personal-access-tokens/
 <div class="row">
 <select id="newBlockType" style="width:auto">
 <option value="text">Text Section (heading + paragraphs)</option>
-<option value="heroimg">Hero with Image (bari heading + side tasveer)</option>
-<option value="zigzag">Zigzag (tasveer + text, bari bari)</option>
 <option value="steps">Numbered Steps / Tips</option>
-<option value="cards">Cards (boxes)</option>
-<option value="pricing">Pricing Plans (price wale cards)</option>
-<option value="gallery">Gallery (tasveeron ki grid)</option>
+<option value="cards">Cards (2–4 boxes)</option>
 <option value="message">Message Box (WhatsApp script type)</option>
 <option value="faq">FAQ (sawal jawab)</option>
 <option value="image">Image</option>
-<option value="buttons">Buttons Row</option>
-<option value="band">Dark Band (bari heading wala hissa)</option>
 <option value="cta">Last CTA Band</option>
 </select>
 <button class="btn alt" onclick="addBlock()">+ Block Jorein</button>
@@ -134,13 +123,6 @@ Key banane ke liye: <a href="https://github.com/settings/personal-access-tokens/
 <button class="btn alt" onclick="resetEditor()">Naya Page (saaf karein)</button>
 </div>
 <div class="status" id="status"></div>
-</div>
-
-<div class="panel">
-<h2>Live Preview — Page Banta Hua</h2>
-<p class="hint">Upar jo kuch likhein ya badlein, wo yahan sath sath dikhta hai. Ye sirf preview hai — asal page <b>Publish</b> dabane se live hoga.</p>
-<iframe id="livePrev" title="Live preview"></iframe>
-<div class="row" style="margin-top:12px"><button class="btn alt" onclick="refreshPreview()">Preview Refresh Karein</button></div>
 </div>
 
 <div class="panel">
@@ -158,41 +140,6 @@ const SITE_CSS = "\n:root{--dark:#080e0a;--green:#10b981;--paper:#f7f8f4;--ink:#
 const SITE_HEADER = "<div class=\"uh-top\"><div class=\"wrap uh-topin\"><span>Smart POS \u2022 Khata \u2022 Inventory \u2014 for retail shops everywhere</span><span class=\"uh-topr\"><a href=\"https://wa.me/923257633875\" target=\"_blank\" rel=\"noopener\">WhatsApp: +92 325 7633875</a><a href=\"mailto:dokanretailkhata@gmail.com\">dokanretailkhata@gmail.com</a></span></div></div>\n<header class=\"uh-head\"><div class=\"wrap uh-nav\"><a class=\"uh-brand\" href=\"./index.html\"><img src=\"./digital-dokan-logo-dark.png\" alt=\"Digital Dokan\"></a><nav class=\"uh-links\"><a href=\"./index.html\">Home</a><a href=\"./features.html\">Features</a><a href=\"./pricing.html\">Pricing</a><a href=\"./compare.html\">Compare</a><a href=\"./blog.html\">Blog</a><a href=\"./about.html\">About</a><a href=\"./contact.html\">Contact</a></nav><div class=\"uh-actions\"><a class=\"uh-btn uh-btno\" href=\"./mydokan2.html\">Log In</a><a class=\"uh-btn uh-btng\" href=\"./mydokan2.html\">Start Free Trial</a><button class=\"uh-hamb\" aria-label=\"Open menu\" onclick=\"uhToggle()\">\u2630</button></div></div><div class=\"uh-menu\" id=\"uhMenu\"><a href=\"./index.html\">Home</a><a href=\"./features.html\">Features</a><a href=\"./pricing.html\">Pricing</a><a href=\"./compare.html\">Compare</a><a href=\"./blog.html\">Blog</a><a href=\"./about.html\">About Us</a><a href=\"./contact.html\">Contact Us</a><a href=\"./mydokan2.html\">Log In</a></div></header>";
 const SITE_FOOTER = "<footer class=\"uf\"><div class=\"wrap\"><div class=\"uf-grid\"><div><a class=\"uf-brand\" href=\"./index.html\"><img src=\"./digital-dokan-logo-dark.png\" alt=\"Digital Dokan\"></a><p>Simple retail software for modern businesses \u2014 POS billing, udhaar khata, stock and profit reports in one app.</p><a href=\"https://wa.me/923257633875\" target=\"_blank\" rel=\"noopener\">WhatsApp Support</a><a href=\"mailto:dokanretailkhata@gmail.com\">Email Us</a></div><div><h4>Quick Links</h4><a href=\"./index.html\">Home</a><a href=\"./features.html\">Features</a><a href=\"./pricing.html\">Pricing</a><a href=\"./compare.html\">Compare</a><a href=\"./blog.html\">Blog</a><a href=\"./mydokan2.html\">Login</a><a href=\"./mydokan2.html\">Open App</a></div><div><h4>Shop Types We Serve</h4><div class=\"uf-type\"><span>Kiryana &amp; General Stores</span><span>Pharmacies &amp; Medical Stores</span><span>Garments &amp; Fashion Shops</span><span>Mobile &amp; Accessories Shops</span><span>Bakeries &amp; Sweet Shops</span><span>Wholesale &amp; Distribution</span></div></div><div><h4>Contact</h4><a href=\"mailto:dokanretailkhata@gmail.com\">dokanretailkhata@gmail.com</a><a href=\"https://wa.me/923257633875\" target=\"_blank\" rel=\"noopener\">WhatsApp: +92 325 7633875</a><a href=\"./privacy.html\">Privacy Policy</a><a href=\"./terms.html\">Terms of Use</a></div></div><div class=\"uf-copy\">Copyright 2026 Digital Dokan. All rights reserved.</div></div></footer>";
 const SITE_TOGGLE = "<scr" + "ipt>function uhToggle(){document.getElementById('uhMenu').classList.toggle('open')}</scr" + "ipt>";
-const SITE_IMGS = ["./home-khata.jpg","./dashboard-hero-attached.png","./quick-billing-attached.png","./business-reports-attached.png","./sales-invoices-latest.png"];
-const DD_CSS = [
-".ddx-hero2{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center}",
-".ddx-hero2 img{width:100%;border-radius:16px;display:block}",
-".ddx-hero2 .btns{margin-top:22px;display:flex;gap:12px;flex-wrap:wrap}",
-".btn.alt2{background:transparent;color:#f8fafc;border:1px solid #4b6b58}",
-".ddx-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}",
-".ddx-grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:26px}",
-".ddx-grid3 .card,.ddx-grid4 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px}",
-".ddx-grid3 .card h3,.ddx-grid4 .card h3{margin:0 0 8px}",
-".ddx-grid3 .card p,.ddx-grid4 .card p{margin:0;color:var(--muted);line-height:1.65}",
-".dark .ddx-grid3 .card,.dark .ddx-grid4 .card{background:#112118;border-color:#294536}",
-".dark .ddx-grid3 .card p,.dark .ddx-grid4 .card p{color:#a7b5ad}",
-".ddx-zig{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:center;margin:0 0 46px}",
-".ddx-zig img{width:100%;border-radius:14px;display:block}",
-".ddx-zig h3{font-size:1.35rem;margin:0 0 10px}",
-".ddx-zig p{line-height:1.75;color:#2a3a30;margin:0 0 12px}",
-".ddx-gal{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}",
-".ddx-gal figure{margin:0}",
-".ddx-gal img{width:100%;border-radius:12px;display:block}",
-".ddx-gal figcaption{color:var(--muted);margin-top:8px;line-height:1.55}",
-".ddx-price{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:26px}",
-".ddx-plan{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;flex-direction:column}",
-".ddx-plan.hot{border:2px solid var(--green)}",
-".ddx-plan h3{margin:0 0 6px}",
-".ddx-plan .amt{font-size:1.85rem;font-weight:750;margin:6px 0 14px}",
-".ddx-plan ul{margin:0 0 20px;padding-left:18px;line-height:1.9;color:#2a3a30}",
-".ddx-plan .btn{margin-top:auto;justify-content:center}",
-".ddx-btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:10px 0}",
-".btn.dark2{background:var(--dark);color:#fff}",
-".btn.line2{background:transparent;border:1px solid var(--line);color:var(--ink)}",
-".ddx-center{text-align:center}",
-".ddx-center p{max-width:680px;margin-left:auto;margin-right:auto}",
-"@media(max-width:820px){.ddx-hero2,.ddx-zig{grid-template-columns:1fr}.ddx-grid3,.ddx-grid4,.ddx-gal,.ddx-price{grid-template-columns:1fr}}"
-].join("\n");
 const REPO = "digitaldokanapp/digital-dokan";
 const BASE = "https://digitaldokanapp.github.io/digital-dokan/";
 const SKIP = ["index.html","features.html","pricing.html","compare.html","blog.html","about.html","contact.html","privacy.html","terms.html","admin.html","mydokan2.html","khata.html","website-builder.html"];
@@ -255,21 +202,15 @@ function saveKey(){
 /* ===== Editor state ===== */
 let blocks = [];
 let editingSlug = "";
-const BLOCK_NAMES = {text:"Text Section", heroimg:"Hero with Image", steps:"Numbered Steps", cards:"Cards", pricing:"Pricing Plans", zigzag:"Zigzag", gallery:"Gallery", message:"Message Box", faq:"FAQ", image:"Image", buttons:"Buttons Row", band:"Dark Band", cta:"CTA Band"};
+const BLOCK_NAMES = {text:"Text Section", steps:"Numbered Steps", cards:"Cards", message:"Message Box", faq:"FAQ", image:"Image", cta:"CTA Band"};
 function blankBlock(type){
   switch(type){
     case "text": return {type, heading:"", body:""};
-    case "heroimg": return {type, eyebrow:"", heading:"", text:"", img:"", alt:"", btn:"", link:"", btn2:"", link2:""};
     case "steps": return {type, heading:"", items:[{h:"", t:""}]};
-    case "cards": return {type, heading:"", intro:"", dark:false, cols:"2", items:[{h:"", t:""},{h:"", t:""}]};
-    case "pricing": return {type, heading:"", intro:"", items:[{h:"", price:"", t:"", btn:"Start Free Trial", link:"./mydokan2.html", hot:false},{h:"", price:"", t:"", btn:"Start Free Trial", link:"./mydokan2.html", hot:false}]};
-    case "zigzag": return {type, heading:"", items:[{h:"", t:"", src:"", alt:""}]};
-    case "gallery": return {type, heading:"", items:[{src:"", alt:"", caption:""}]};
+    case "cards": return {type, heading:"", intro:"", dark:false, items:[{h:"", t:""},{h:"", t:""}]};
     case "message": return {type, label:"", text:""};
     case "faq": return {type, heading:"Common Questions", items:[{q:"", a:""}]};
     case "image": return {type, src:"", alt:"", caption:"", uploadName:""};
-    case "buttons": return {type, items:[{h:"", t:"", s:"g"}]};
-    case "band": return {type, heading:"", text:""};
     case "cta": return {type, heading:"", text:"", btn:"Start Free Trial", link:"./mydokan2.html"};
   }
 }
@@ -293,7 +234,6 @@ function blockForm(b, i){
   } else if (b.type === "cards"){
     h += field("Section ki heading", b.heading, "Misal: What Digital Dokan Does", "heading");
     h += area("Chhota intro (khali bhi ho sakta hai)", b.intro, "", "intro");
-    h += '<label>Columns — kitne card ek line mein</label><select data-f="cols"><option value="2"' + (String(b.cols || "2") === "2" ? " selected" : "") + '>2 columns</option><option value="3"' + (String(b.cols) === "3" ? " selected" : "") + '>3 columns</option><option value="4"' + (String(b.cols) === "4" ? " selected" : "") + '>4 columns</option></select>';
     h += '<label><input type="checkbox" data-f="dark" ' + (b.dark ? "checked" : "") + ' style="width:auto"> Dark (gehra rang) wala section</label>';
     b.items.forEach((it, j) => {
       h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Card " + (j+1) + " ka title", it.h, "", "items." + j + ".h") + area("Card " + (j+1) + " ka text", it.t, "", "items." + j + ".t") + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye card hatayein</button></div>';
@@ -314,43 +254,6 @@ function blockForm(b, i){
     h += '<label>Ya apni tasveer upload karein (JPG/PNG, 1.5MB se chhoti)</label><input type="file" accept="image/*" onchange="pickUpload(' + i + ', this)"><div class="count" id="upNote' + i + '">' + (b.uploadName ? ("Upload tayyar: " + esc(b.uploadName)) : "") + '</div>';
     h += field("Tasveer ki alt text (SEO ke liye)", b.alt, "Tasveer mein kya hai, ek jumla", "alt");
     h += field("Neeche caption (khali bhi ho sakta hai)", b.caption, "", "caption");
-  } else if (b.type === "heroimg"){
-    h += field("Chhota label (heading ke upar)", b.eyebrow, "Misal: DIGITAL DOKAN", "eyebrow");
-    h += field("Bari heading", b.heading, "", "heading");
-    h += area("Text", b.text, "", "text");
-    h += imgPicker("img", i + "h", b.img);
-    h += field("Tasveer ki alt text", b.alt, "", "alt");
-    h += field("Pehle button ka text (khali = koi button nahi)", b.btn, "Start Free Trial", "btn");
-    h += field("Pehle button ka link", b.link, "./mydokan2.html", "link");
-    h += field("Dusre button ka text (khali bhi ho sakta hai)", b.btn2, "See Features", "btn2");
-    h += field("Dusre button ka link", b.link2, "./features.html", "link2");
-  } else if (b.type === "zigzag"){
-    h += field("Section ki heading (khali bhi ho sakti hai)", b.heading, "", "heading");
-    b.items.forEach((it, j) => {
-      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Hisse " + (j+1) + " ki heading", it.h, "", "items." + j + ".h") + area("Hisse " + (j+1) + " ka text", it.t, "", "items." + j + ".t") + imgPicker("items." + j + ".src", i + "z" + j, it.src) + field("Alt text", it.alt, "", "items." + j + ".alt") + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye hissa hatayein</button></div>';
-    });
-    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Hissa jorein</button></div>';
-  } else if (b.type === "gallery"){
-    h += field("Section ki heading (khali bhi ho sakti hai)", b.heading, "", "heading");
-    b.items.forEach((it, j) => {
-      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + imgPicker("items." + j + ".src", i + "g" + j, it.src) + field("Alt text", it.alt, "", "items." + j + ".alt") + field("Caption (tasveer ke neeche)", it.caption, "", "items." + j + ".caption") + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye tasveer hatayein</button></div>';
-    });
-    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Tasveer jorein</button></div>';
-  } else if (b.type === "pricing"){
-    h += field("Section ki heading", b.heading, "Misal: Simple Pricing", "heading");
-    h += area("Chhota intro (khali bhi ho sakta hai)", b.intro, "", "intro");
-    b.items.forEach((it, j) => {
-      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Plan " + (j+1) + " ka naam", it.h, "Misal: Pro Monthly", "items." + j + ".h") + field("Plan " + (j+1) + " ki price", it.price, "Misal: Rs 2,500 / month", "items." + j + ".price") + area("Features — har line par ek feature", it.t, "", "items." + j + ".t") + field("Button ka text", it.btn, "Start Free Trial", "items." + j + ".btn") + field("Button ka link", it.link, "./mydokan2.html", "items." + j + ".link") + '<label><input type="checkbox" data-f="items.' + j + '.hot" ' + (it.hot ? "checked" : "") + ' style="width:auto"> Is plan ko highlight karein (green border)</label>' + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye plan hatayein</button></div>';
-    });
-    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Plan jorein</button></div>';
-  } else if (b.type === "buttons"){
-    b.items.forEach((it, j) => {
-      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Button " + (j+1) + " ka text", it.h, "", "items." + j + ".h") + field("Button " + (j+1) + " ka link", it.t, "./mydokan2.html", "items." + j + ".t") + '<label>Button ka rang</label><select data-f="items.' + j + '.s"><option value="g"' + (it.s === "g" ? " selected" : "") + '>Green</option><option value="d"' + (it.s === "d" ? " selected" : "") + '>Dark</option><option value="o"' + (it.s === "o" ? " selected" : "") + '>Outline (sirf border)</option></select>' + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye button hatayein</button></div>';
-    });
-    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Button jorein</button></div>';
-  } else if (b.type === "band"){
-    h += field("Band ki heading", b.heading, "", "heading");
-    h += area("Band ka text", b.text, "", "text");
   } else if (b.type === "cta"){
     h += field("CTA heading", b.heading, "Misal: Start Your Free Trial Today", "heading");
     h += area("CTA text", b.text, "", "text");
@@ -367,7 +270,6 @@ function renderBlocks(){
     '<button class="iconbtn" onclick="removeBlock(' + i + ')">✕ Hatayein</button></span></div>' +
     '<div data-block="' + i + '">' + blockForm(b, i) + '</div></div>'
   ).join("");
-  refreshPreview();
 }
 function readBlocks(){
   document.querySelectorAll("[data-block]").forEach(wrap => {
@@ -384,14 +286,7 @@ function readBlocks(){
 function addBlock(){ readBlocks(); blocks.push(blankBlock($("newBlockType").value)); renderBlocks(); }
 function removeBlock(i){ readBlocks(); blocks.splice(i, 1); renderBlocks(); }
 function moveBlock(i, dir){ readBlocks(); const j = i + dir; if (j < 0 || j >= blocks.length) return; const t = blocks[i]; blocks[i] = blocks[j]; blocks[j] = t; renderBlocks(); }
-function addItem(i){ readBlocks(); const b = blocks[i];
-  if (b.type === "faq") b.items.push({q:"", a:""});
-  else if (b.type === "pricing") b.items.push({h:"", price:"", t:"", btn:"Start Free Trial", link:"./mydokan2.html", hot:false});
-  else if (b.type === "zigzag") b.items.push({h:"", t:"", src:"", alt:""});
-  else if (b.type === "gallery") b.items.push({src:"", alt:"", caption:""});
-  else if (b.type === "buttons") b.items.push({h:"", t:"", s:"g"});
-  else b.items.push({h:"", t:""});
-  renderBlocks(); }
+function addItem(i){ readBlocks(); const b = blocks[i]; if (b.type === "faq") b.items.push({q:"", a:""}); else b.items.push({h:"", t:""}); renderBlocks(); }
 function delItem(i, j){ readBlocks(); blocks[i].items.splice(j, 1); renderBlocks(); }
 const uploadStore = {};
 function pickUpload(i, input){
@@ -409,7 +304,6 @@ function collectPage(){
   readBlocks();
   return {
     type: $("pType").value,
-    bare: $("pBare").checked,
     slug: slugify($("pSlug").value || $("pTitle").value),
     title: $("pTitle").value.trim(),
     desc: $("pDesc").value.trim(),
@@ -422,7 +316,7 @@ function collectPage(){
   };
 }
 function fillEditor(p){
-  $("pType").value = p.type; $("pBare").checked = !!p.bare; $("pSlug").value = p.slug; $("pTitle").value = p.title || "";
+  $("pType").value = p.type; $("pSlug").value = p.slug; $("pTitle").value = p.title || "";
   $("pDesc").value = p.desc || ""; $("pEyebrow").value = p.eyebrow || ""; $("pH1").value = p.h1 || "";
   $("pIntro").value = p.intro || ""; $("pCardText").value = p.cardText || "";
   if (p.cardImg) $("pCardImg").value = p.cardImg;
@@ -433,83 +327,29 @@ function fillEditor(p){
 }
 function resetEditor(){
   ["pSlug","pTitle","pDesc","pEyebrow","pH1","pIntro","pCardText"].forEach(id => $(id).value = "");
-  $("pBare").checked = false; blocks = []; editingSlug = ""; renderBlocks(); countAll();
+  blocks = []; editingSlug = ""; renderBlocks(); countAll();
 }
 function toggleBlogFields(){ $("blogFields").style.display = $("pType").value === "blog" ? "block" : "none"; }
 
 /* ===== Templates ===== */
-const TEMPLATES = [
- {id:"blog", name:"Blog Article", desc:"Guide wali post — intro, numbered tips, message box, sawal-jawab, akhri card", page:{type:"blog", bare:false, slug:"", title:"Your Blog Title Here", desc:"Write a short Google description here.", eyebrow:"DIGITAL DOKAN GUIDE", h1:"Your Guide Heading Here", intro:"Write the opening lines of your guide here. Tell the reader what problem this guide solves.", cardText:"A short line about this guide for the blog card.", cardImg:"./home-khata.jpg", blocks:[
-   {type:"text", heading:"Why This Matters", body:"Write your first paragraphs here.\n\nAdd a second paragraph with more detail."},
-   {type:"steps", heading:"Simple Steps That Work", items:[{h:"First step title", t:"Explain the first step here."},{h:"Second step title", t:"Explain the second step here."},{h:"Third step title", t:"Explain the third step here."}]},
-   {type:"message", label:"A message you can copy", text:"Write a ready-to-send WhatsApp message here."},
-   {type:"faq", heading:"Common Questions", items:[{q:"Your first question?", a:"Write the answer here."},{q:"Your second question?", a:"Write the answer here."}]},
-   {type:"cta", heading:"Try Digital Dokan Free", text:"Start the 7-day free trial — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"guide", name:"Guide Page", desc:"Cards + steps + FAQ wala maloomati page", page:{type:"page", bare:false, slug:"", title:"Your Guide Page Title", desc:"Write a short Google description here.", eyebrow:"GUIDE", h1:"Your Guide Heading", intro:"Write what this guide covers in two or three lines.", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"cards", heading:"What This Guide Covers", intro:"", dark:false, cols:"2", items:[{h:"Point one", t:"Short text for point one."},{h:"Point two", t:"Short text for point two."},{h:"Point three", t:"Short text for point three."},{h:"Point four", t:"Short text for point four."}]},
-   {type:"steps", heading:"How It Works", items:[{h:"Step one", t:"Explain step one."},{h:"Step two", t:"Explain step two."}]},
-   {type:"faq", heading:"Common Questions", items:[{q:"Your first question?", a:"Write the answer here."}]},
-   {type:"cta", heading:"Try Digital Dokan Free", text:"Start the 7-day free trial — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"info", name:"Info / Service Page", desc:"Cards + text + FAQ wala aam page", page:{type:"page", bare:false, slug:"", title:"Your Page Title", desc:"Write a short Google description here.", eyebrow:"DIGITAL DOKAN", h1:"Your Page Heading", intro:"Write a short intro for this page.", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"cards", heading:"Main Points", intro:"", dark:false, cols:"2", items:[{h:"Point one", t:"Short text."},{h:"Point two", t:"Short text."}]},
-   {type:"text", heading:"More Detail", body:"Write the detailed text here."},
-   {type:"faq", heading:"Common Questions", items:[{q:"Your first question?", a:"Write the answer here."}]},
-   {type:"cta", heading:"Try Digital Dokan Free", text:"Start the 7-day free trial — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"landing", name:"Landing Page", desc:"Saaf page — header/footer ke baghair, bara hero + tasveer, cards aur CTA (ads ke liye behtareen)", page:{type:"page", bare:true, slug:"", title:"Your Landing Page Title", desc:"Write a short Google description here.", eyebrow:"", h1:"", intro:"", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"heroimg", eyebrow:"DIGITAL DOKAN", heading:"Run Your Whole Shop From One App", text:"Write your main offer line here — billing, udhaar khata, stock and profit, all in one simple app.", img:"./dashboard-hero-attached.png", alt:"Digital Dokan dashboard", btn:"Start Free Trial", link:"./mydokan2.html", btn2:"See Features", link2:"./features.html"},
-   {type:"cards", heading:"Why Shop Owners Choose It", intro:"", dark:false, cols:"3", items:[{h:"Fast Billing", t:"Bills in seconds, even at rush hour."},{h:"Clear Udhaar Khata", t:"Every customer balance, always up to date."},{h:"Real Profit", t:"Know your true profit every day."}]},
-   {type:"band", heading:"Made for Small Shops", text:"Kiryana stores, pharmacies, garment shops, mobile shops and wholesalers — one simple app for daily shop work."},
-   {type:"faq", heading:"Common Questions", items:[{q:"Is there a free trial?", a:"Yes — 7 days free, every feature included, no card needed."},{q:"What does it cost after the trial?", a:"Pro Monthly is Rs 2,500 per month and Pro Yearly is Rs 22,500 per year."}]},
-   {type:"cta", heading:"Start Your Free Trial Today", text:"Seven days free — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"feature", name:"Feature Page", desc:"Hero + zigzag sections (tasveer/text bari bari) + cards — kisi feature ko samjhane ke liye", page:{type:"page", bare:false, slug:"", title:"Your Feature Page Title", desc:"Write a short Google description here.", eyebrow:"FEATURE", h1:"Your Feature Heading", intro:"Write what this feature does in two or three lines.", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"zigzag", heading:"How It Helps", items:[{h:"First benefit", t:"Explain the first benefit here.", src:"./quick-billing-attached.png", alt:"Billing screen"},{h:"Second benefit", t:"Explain the second benefit here.", src:"./business-reports-attached.png", alt:"Reports screen"}]},
-   {type:"cards", heading:"More Good Things", intro:"", dark:false, cols:"2", items:[{h:"Point one", t:"Short text."},{h:"Point two", t:"Short text."}]},
-   {type:"cta", heading:"Try It Free", text:"Start the 7-day free trial — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"pricing", name:"Pricing Page", desc:"Plan wale cards — price, features ki list aur button (Digital Dokan ke asal plan pehle se bhare hue)", page:{type:"page", bare:false, slug:"", title:"Your Pricing Page Title", desc:"Write a short Google description here.", eyebrow:"PRICING", h1:"Simple, Honest Pricing", intro:"Start free. Upgrade when your shop is ready.", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"pricing", heading:"Choose Your Plan", intro:"", items:[
-     {h:"Free Trial", price:"Rs 0", t:"7 days free\nUp to 50 items\nAll features included\nNo card needed", btn:"Start Free Trial", link:"./mydokan2.html", hot:false},
-     {h:"Pro Monthly", price:"Rs 2,500 / month", t:"Unlimited items\nAll features included\nStaff logins with roles\nWhatsApp support", btn:"Start Free Trial", link:"./mydokan2.html", hot:true},
-     {h:"Pro Yearly", price:"Rs 22,500 / year", t:"Unlimited items\nAll features included\nStaff logins with roles\nSave Rs 7,500 vs monthly", btn:"Start Free Trial", link:"./mydokan2.html", hot:false}]},
-   {type:"faq", heading:"Common Questions", items:[{q:"How do I pay?", a:"Pay by EasyPaisa or JazzCash and send the receipt on WhatsApp — your plan is activated by hand after the payment is checked."}]},
-   {type:"cta", heading:"Start Free Today", text:"Seven days free — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"gallery", name:"Gallery Page", desc:"Bari tasveeron ki grid — showcase ke liye", page:{type:"page", bare:false, slug:"", title:"Your Gallery Page Title", desc:"Write a short Google description here.", eyebrow:"GALLERY", h1:"Your Gallery Heading", intro:"Write a short intro for this gallery.", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"gallery", heading:"Inside the App", items:[
-     {src:"./dashboard-hero-attached.png", alt:"Dashboard", caption:"Dashboard — your whole shop at a glance"},
-     {src:"./quick-billing-attached.png", alt:"Billing", caption:"Quick billing at the counter"},
-     {src:"./business-reports-attached.png", alt:"Reports", caption:"Reports that show real profit"},
-     {src:"./sales-invoices-latest.png", alt:"Invoices", caption:"Clean, printable invoices"},
-     {src:"./home-khata.jpg", alt:"Khata", caption:"Customer khata on your phone"}]},
-   {type:"cta", heading:"Try Digital Dokan Free", text:"Start the 7-day free trial — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"twocol", name:"Two-Column Page", desc:"Ek side text, dusri side tasveer — phir cards", page:{type:"page", bare:false, slug:"", title:"Your Page Title", desc:"Write a short Google description here.", eyebrow:"DIGITAL DOKAN", h1:"Your Page Heading", intro:"Write a short intro for this page.", cardText:"", cardImg:"./home-khata.jpg", blocks:[
-   {type:"zigzag", heading:"", items:[{h:"Your heading here", t:"Write the main text for this side here. Keep it simple and clear.", src:"./dashboard-hero-attached.png", alt:"Dashboard"}]},
-   {type:"cards", heading:"Key Points", intro:"", dark:false, cols:"2", items:[{h:"Point one", t:"Short text."},{h:"Point two", t:"Short text."}]},
-   {type:"cta", heading:"Try Digital Dokan Free", text:"Start the 7-day free trial — every feature included, no card needed.", btn:"Start Free Trial", link:"./mydokan2.html"}]}},
- {id:"blank", name:"Blank Page", desc:"Sirf hero aur text — baqi khud jorein", page:{type:"page", bare:false, slug:"", title:"", desc:"", eyebrow:"", h1:"", intro:"", cardText:"", cardImg:"./home-khata.jpg", blocks:[{type:"text", heading:"", body:""}]}}
-];
 function pickTpl(name){
-  const t = TEMPLATES.find(x => x.id === name); if (!t) return;
-  document.querySelectorAll(".tplcard").forEach(c => c.classList.toggle("sel", c.getAttribute("data-tpl") === name));
-  fillEditor(JSON.parse(JSON.stringify(t.page)));
+  document.querySelectorAll("#tplRow button").forEach(b => b.classList.toggle("sel", b.getAttribute("data-tpl") === name));
+  let bs = [];
+  if (name === "blog"){
+    $("pType").value = "blog";
+    bs = [blankBlock("text"), blankBlock("steps"), blankBlock("message"), blankBlock("faq"), blankBlock("cta")];
+  } else if (name === "guide"){
+    $("pType").value = "page";
+    bs = [blankBlock("cards"), blankBlock("steps"), blankBlock("faq"), blankBlock("cta")];
+  } else if (name === "info"){
+    $("pType").value = "page";
+    bs = [blankBlock("cards"), blankBlock("text"), blankBlock("faq"), blankBlock("cta")];
+  } else {
+    $("pType").value = "page";
+    bs = [blankBlock("text")];
+  }
+  blocks = bs; editingSlug = ""; toggleBlogFields(); renderBlocks();
 }
-function renderGallery(){
-  $("tplGal").innerHTML = TEMPLATES.map(t =>
-    '<div class="tplcard" data-tpl="' + t.id + '"><div class="pvwrap"><iframe id="pv-' + t.id + '" title="' + escA(t.name) + ' preview"></iframe></div><div class="tc"><b>' + esc(t.name) + '</b><span>' + esc(t.desc) + '</span><button class="btn sm" onclick="pickTpl(\'' + t.id + '\')">Ye Template Chunein</button></div></div>'
-  ).join("");
-  TEMPLATES.forEach(t => {
-    const f = $("pv-" + t.id); if (!f) return;
-    const sample = JSON.parse(JSON.stringify(t.page)); sample.slug = "preview"; sample.title = sample.title || t.name;
-    f.srcdoc = buildPageHTML(sample);
-  });
-}
-let _pvT = null;
-function refreshPreview(){
-  try {
-    const f = $("livePrev"); if (!f) return;
-    const p = collectPage();
-    f.srcdoc = buildPageHTML(p);
-  } catch(e){}
-}
-function debouncePreview(){ clearTimeout(_pvT); _pvT = setTimeout(refreshPreview, 600); }
 
 /* ===== Generator: blocks -> page HTML (site design) ===== */
 function blockHTML(b){
@@ -526,7 +366,7 @@ function blockHTML(b){
     return '<section class="sec' + (b.dark ? " dark" : "") + '"><div class="wrap">' +
       (b.heading ? '<span class="eyebrow">Overview</span><h2>' + esc(b.heading) + "</h2>" : "") +
       (b.intro ? '<p class="muted">' + fmt(b.intro) + "</p>" : "") +
-      '<div class="' + (String(b.cols || "2") === "3" ? "ddx-grid3" : String(b.cols || "2") === "4" ? "ddx-grid4" : "grid2") + '">' + items.map(it => '<div class="card"><h3>' + esc(it.h) + "</h3><p>" + fmt(it.t) + "</p></div>").join("") + "</div></div></section>";
+      '<div class="grid2">' + items.map(it => '<div class="card"><h3>' + esc(it.h) + "</h3><p>" + fmt(it.t) + "</p></div>").join("") + "</div></div></section>";
   }
   if (b.type === "message"){
     return '<section class="post wrap"><div class="msg">' + (b.label ? '<span class="tag">' + esc(b.label) + "</span>" : "") + "<p>" + fmt(b.text).replace(/\n/g,"<br>") + "</p></div></section>";
@@ -543,47 +383,6 @@ function blockHTML(b){
   }
   if (b.type === "cta"){
     return '<section class="wrap"><div class="cta"><h2>' + esc(b.heading) + '</h2><p>' + fmt(b.text) + '</p><a class="btn" href="' + escA(b.link || "./mydokan2.html") + '">' + esc(b.btn || "Start Free Trial") + "</a></div></section>";
-  }
-  if (b.type === "heroimg"){
-    if (!b.heading && !b.text && !b.img) return "";
-    return '<section class="hero"><div class="wrap ddx-hero2"><div>' +
-      (b.eyebrow ? '<span class="eyebrow">' + esc(b.eyebrow) + "</span>" : "") +
-      (b.heading ? "<h1>" + esc(b.heading) + "</h1>" : "") +
-      (b.text ? "<p>" + fmt(b.text) + "</p>" : "") +
-      ((b.btn || b.btn2) ? '<div class="btns">' + (b.btn ? '<a class="btn" href="' + escA(b.link || "./mydokan2.html") + '">' + esc(b.btn) + "</a>" : "") + (b.btn2 ? '<a class="btn alt2" href="' + escA(b.link2 || "./features.html") + '">' + esc(b.btn2) + "</a>" : "") + "</div>" : "") +
-      '</div><div>' + (b.img ? '<img src="' + escA(b.img) + '" alt="' + escA(b.alt) + '">' : "") + "</div></div></section>";
-  }
-  if (b.type === "zigzag"){
-    const items = (b.items || []).filter(x => x.h.trim() || x.t.trim() || x.src);
-    if (!items.length && !b.heading) return "";
-    return '<section class="sec"><div class="wrap">' + (b.heading ? "<h2>" + esc(b.heading) + "</h2>" : "") +
-      items.map((it, j) => {
-        const txt = "<div><h3>" + esc(it.h) + "</h3>" + paras(it.t) + "</div>";
-        const img = "<div>" + (it.src ? '<img src="' + escA(it.src) + '" alt="' + escA(it.alt) + '">' : "") + "</div>";
-        return '<div class="ddx-zig">' + (j % 2 ? txt + img : img + txt) + "</div>";
-      }).join("") + "</div></section>";
-  }
-  if (b.type === "gallery"){
-    const items = (b.items || []).filter(x => x.src);
-    if (!items.length) return "";
-    return '<section class="sec"><div class="wrap">' + (b.heading ? "<h2>" + esc(b.heading) + "</h2>" : "") +
-      '<div class="ddx-gal">' + items.map(it => "<figure>" + '<img src="' + escA(it.src) + '" alt="' + escA(it.alt) + '">' + (it.caption ? "<figcaption>" + esc(it.caption) + "</figcaption>" : "") + "</figure>").join("") + "</div></div></section>";
-  }
-  if (b.type === "pricing"){
-    const items = (b.items || []).filter(x => x.h.trim() || x.price.trim());
-    return '<section class="sec"><div class="wrap">' + (b.heading ? '<span class="eyebrow">Pricing</span><h2>' + esc(b.heading) + "</h2>" : "") +
-      (b.intro ? '<p class="muted">' + fmt(b.intro) + "</p>" : "") +
-      '<div class="ddx-price">' + items.map(it => '<div class="ddx-plan' + (it.hot ? " hot" : "") + '"><h3>' + esc(it.h) + '</h3><div class="amt">' + esc(it.price) + "</div><ul>" +
-        String(it.t || "").split("\n").map(x => x.trim()).filter(Boolean).map(x => "<li>" + esc(x) + "</li>").join("") +
-        '</ul><a class="btn" href="' + escA(it.link || "./mydokan2.html") + '">' + esc(it.btn || "Start Free Trial") + "</a></div>").join("") + "</div></div></section>";
-  }
-  if (b.type === "buttons"){
-    const items = (b.items || []).filter(x => x.h.trim());
-    if (!items.length) return "";
-    return '<section class="post wrap"><div class="ddx-btnrow">' + items.map(it => '<a class="btn' + (it.s === "d" ? " dark2" : it.s === "o" ? " line2" : "") + '" href="' + escA(it.t || "./mydokan2.html") + '">' + esc(it.h) + "</a>").join("") + "</div></section>";
-  }
-  if (b.type === "band"){
-    return '<section class="sec dark"><div class="wrap ddx-center"><h2>' + esc(b.heading) + '</h2><p class="muted">' + fmt(b.text) + "</p></div></section>";
   }
   return "";
 }
@@ -609,7 +408,7 @@ function buildPageHTML(p){
     '<link rel="canonical" href="' + url + '">\n' +
     '<link rel="icon" type="image/webp" href="./digital-dokan-icon.webp">\n<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">\n<link rel="apple-touch-icon" sizes="180x180" href="./favicon-180.png">\n' +
     '<meta property="og:type" content="' + (p.type === "blog" ? "article" : "website") + '">\n<meta property="og:site_name" content="Digital Dokan">\n<meta property="og:title" content="' + escA(p.title) + '">\n<meta property="og:description" content="' + escA(p.desc) + '">\n<meta property="og:url" content="' + url + '">\n<meta property="og:image" content="' + BASE + 'og-cover.jpg">\n' +
-    schemas + "\n<style>" + SITE_CSS + "\n" + DD_CSS + "</style>\n</head>\n<body>\n" + (p.bare ? "" : SITE_HEADER + "\n" + SITE_TOGGLE + "\n") + "<main>\n" + body + "\n</main>\n" + (p.bare ? "" : SITE_FOOTER + "\n") + "<!--DD-CMS:" + b64enc(JSON.stringify(p)) + "-->\n</body>\n</html>";
+    schemas + "\n<style>" + SITE_CSS + "</style>\n</head>\n<body>\n" + SITE_HEADER + "\n" + SITE_TOGGLE + "\n<main>\n" + body + "\n</main>\n" + SITE_FOOTER + "\n<!--DD-CMS:" + b64enc(JSON.stringify(p)) + "-->\n</body>\n</html>";
 }
 function blogCardHTML(p){
   return '<a class="card post-card" href="./' + p.slug + '.html"><img class="thumb" src="' + escA(p.cardImg || "./home-khata.jpg") + '" alt="' + escA(p.h1 || p.title) + '"><h2>' + esc(p.h1 || p.title) + "</h2><p>" + esc(p.cardText || p.desc) + '</p><span style="color:#087f5b;font-weight:600">Read the guide →</span></a>';
@@ -631,20 +430,15 @@ async function publishPage(){
   try {
     setStatus("Publish ho raha hai — pehle tasveerein, phir page...");
     /* uploaded images first */
-    async function up(key, apply){
-      if (!uploadStore[key]) return;
-      const u = uploadStore[key];
-      const fname = "img-" + p.slug + "-" + u.name;
-      const ex = await ghGetFile(fname);
-      await ghPutRaw(fname, u.dataUrl.split(",")[1], "Panel image: " + fname, ex ? ex.sha : undefined);
-      apply("./" + fname, u.name);
-    }
     for (let i = 0; i < p.blocks.length; i++){
       const b = p.blocks[i];
-      if (b.type === "image") await up(i, (src, nm) => { b.src = src; b.uploadName = nm; });
-      if (b.type === "heroimg") await up(i + "h", src => { b.img = src; });
-      if (b.type === "zigzag") for (let j = 0; j < (b.items || []).length; j++) await up(i + "z" + j, src => { b.items[j].src = src; });
-      if (b.type === "gallery") for (let j = 0; j < (b.items || []).length; j++) await up(i + "g" + j, src => { b.items[j].src = src; });
+      if (b.type === "image" && uploadStore[i]){
+        const up = uploadStore[i];
+        const fname = "img-" + p.slug + "-" + up.name;
+        const existing = await ghGetFile(fname);
+        await ghPutRaw(fname, up.dataUrl.split(",")[1], "Panel image: " + fname, existing ? existing.sha : undefined);
+        b.src = "./" + fname; b.uploadName = up.name;
+      }
     }
     const html = buildPageHTML(p);
     const path = p.slug + ".html";
@@ -724,10 +518,7 @@ function countAll(){
 $("pType").addEventListener("change", toggleBlogFields);
 $("pTitle").addEventListener("input", () => { if (!editingSlug) $("pSlug").value = slugify($("pTitle").value); });
 if (ghKey()) { $("ghKey").value = ghKey(); $("keyState").textContent = "Key is browser mein pehle se save hai."; }
-renderGallery();
 pickTpl("blog");
-document.addEventListener("input", debouncePreview);
-document.addEventListener("change", debouncePreview);
 </script>
 </body>
 </html>
