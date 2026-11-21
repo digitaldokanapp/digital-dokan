@@ -29,7 +29,7 @@ KNOWN = [
 
 # Never list these in the sitemap (the app, the admin panel, the public
 # khata page, and Google's verification file).
-EXCLUDE = {"mydokan2.html", "admin.html", "khata.html"}
+EXCLUDE = {"mydokan2.html", "admin.html", "khata.html", "website-builder.html"}
 EXCLUDE_RE = re.compile(r"^google[0-9a-f]+\.html$")
 
 # Any other .html file is treated as a blog article.

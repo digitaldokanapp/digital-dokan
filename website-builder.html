@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Digital Dokan — Website Panel</title>
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">
+<style>
+:root{--dark:#0B1F17;--dark2:#11291d;--green:#10b981;--green2:#4ADE80;--paper:#f4f6f2;--ink:#15231b;--muted:#5c6f63;--line:#d8e2d8;--red:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.top{background:var(--dark);color:#fff;padding:16px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top img{height:42px}
+.top h1{font-size:1.15rem;margin:0}
+.top span{color:#9fc4ab;font-size:.85rem}
+.wrap{width:min(920px,calc(100% - 28px));margin:22px auto 70px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:20px}
+.panel h2{margin:0 0 6px;font-size:1.15rem}
+.panel p.hint{color:var(--muted);line-height:1.6;margin:4px 0 14px;font-size:.94rem}
+label{display:block;font-weight:600;font-size:.9rem;margin:14px 0 6px}
+input[type=text],input[type=password],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:9px;font:inherit;background:#fff}
+textarea{min-height:90px;line-height:1.55}
+textarea.tall{min-height:150px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:9px;background:var(--green);color:#062016;font-weight:700;border:0;cursor:pointer;font:inherit}
+.btn.alt{background:#e7efe9;color:var(--ink)}
+.btn.dark{background:var(--dark);color:#fff}
+.btn.red{background:#fbeae8;color:var(--red)}
+.btn.sm{padding:8px 13px;font-size:.88rem}
+.btn:disabled{opacity:.5;cursor:wait}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.block{border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0;background:#fbfdfb}
+.block-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.block-head b{color:var(--dark)}
+.block-head .row{gap:6px}
+.iconbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit}
+.status{margin-top:14px;padding:12px 14px;border-radius:9px;background:#eefaf3;border:1px solid #bfe6cf;display:none;line-height:1.55}
+.status.err{background:#fdeceb;border-color:#f3c1bb}
+.pageitem{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:10px 0;flex-wrap:wrap}
+.pageitem small{color:var(--muted)}
+.tpl{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:10px 0}
+.tpl button{text-align:left;border:1px solid var(--line);background:#fbfdfb;border-radius:12px;padding:14px;cursor:pointer;font:inherit}
+.tpl button b{display:block;margin-bottom:4px}
+.tpl button span{color:var(--muted);font-size:.88rem;line-height:1.45;display:block}
+.tpl button.sel{border-color:var(--green);background:#eefaf3}
+.count{font-size:.8rem;color:var(--muted);font-weight:400}
+a{color:#087f5b}
+code{background:#eef2ee;padding:2px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="top"><img src="./digital-dokan-logo-dark.png" alt="Digital Dokan"><div><h1>Website Panel</h1><span>Apne pages aur blog posts khud banayein — bina code ke</span></div></div>
+<div class="wrap">
+
+<div class="panel" id="keyPanel">
+<h2>Step 1 — GitHub Key</h2>
+<p class="hint">Publish karne ke liye ek dafa ki GitHub key chahiye. Key sirf <b>isi browser</b> mein rehti hai — website par ya kisi aur ko nahi jati.<br>
+Key banane ke liye: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub par new key banayein</a> → Repository access mein sirf <code>digital-dokan</code> chunein → Permissions mein <b>Contents: Read and write</b> dein → Generate → copy karke yahan laga dein.</p>
+<label>GitHub Key (token)</label>
+<input type="password" id="ghKey" placeholder="github_pat_...">
+<div class="row" style="margin-top:12px"><button class="btn" onclick="saveKey()">Save Key</button><span id="keyState" class="hint" style="margin:0"></span></div>
+</div>
+
+<div class="panel">
+<h2>Step 2 — Page Banayein</h2>
+<p class="hint">Pehle template chunein, phir khane bharein. Structure badalna ho to blocks ko <b>upar/neeche</b> karein, naya block jorein ya hata dein — bilkul WordPress ki tarah.</p>
+<div class="tpl" id="tplRow">
+<button data-tpl="blog" onclick="pickTpl('blog')"><b>Blog Article</b><span>Guide wali post — intro, numbered tips, message box, sawal-jawab, akhri card</span></button>
+<button data-tpl="guide" onclick="pickTpl('guide')"><b>Guide Page</b><span>Cards + steps + FAQ wala maloomati page</span></button>
+<button data-tpl="info" onclick="pickTpl('info')"><b>Info / Service Page</b><span>Cards + text + FAQ wala aam page</span></button>
+<button data-tpl="blank" onclick="pickTpl('blank')"><b>Blank Page</b><span>Sirf hero aur text — baqi khud jorein</span></button>
+</div>
+
+<div class="grid2">
+<div><label>Page ki qisam</label><select id="pType"><option value="page">Normal Page</option><option value="blog">Blog Post</option></select></div>
+<div><label>Page ka address (slug) — khud ban jata hai</label><input type="text" id="pSlug" placeholder="my-new-page"></div>
+</div>
+<label>Browser tab wala title (SEO Title) <span class="count" id="cTitle"></span></label>
+<input type="text" id="pTitle" placeholder="Misal: How to Control Stock in a Small Shop">
+<label>Google mein dikhne wali description <span class="count" id="cDesc"></span></label>
+<textarea id="pDesc" placeholder="Ek do jumlon mein page ka khulasa — 150 haroof ke andar rakhein"></textarea>
+<label>Chhota sa label (hero ke upar)</label>
+<input type="text" id="pEyebrow" placeholder="Misal: DIGITAL DOKAN GUIDE">
+<label>Bari heading (H1)</label>
+<input type="text" id="pH1" placeholder="Page ki sab se bari heading">
+<label>Shuru ka paragraph (hero ke neeche)</label>
+<textarea id="pIntro" placeholder="Pehla paragraph jo heading ke neeche ayega"></textarea>
+
+<div id="blogFields" style="display:none">
+<label>Blog card ka text (blog page par dikhega)</label>
+<textarea id="pCardText" placeholder="Blog wale card par anay wala chhota khulasa"></textarea>
+<label>Blog card ki tasveer</label>
+<select id="pCardImg">
+<option value="./home-khata.jpg">Khata / register wali tasveer</option>
+<option value="./dashboard-hero-attached.png">Dashboard wali tasveer</option>
+<option value="./quick-billing-attached.png">Billing wali tasveer</option>
+<option value="./business-reports-attached.png">Reports wali tasveer</option>
+<option value="./sales-invoices-latest.png">Invoices wali tasveer</option>
+</select>
+</div>
+
+<h3 style="margin:24px 0 4px">Page ke Blocks (Structure)</h3>
+<p class="hint">Har block page ka ek hissa hai. Text wale khano mein: khali line = naya paragraph, <code>**do sitare**</code> = bold, <code>[ye text](https://link)</code> = link.</p>
+<div id="blocks"></div>
+<div class="row">
+<select id="newBlockType" style="width:auto">
+<option value="text">Text Section (heading + paragraphs)</option>
+<option value="steps">Numbered Steps / Tips</option>
+<option value="cards">Cards (2–4 boxes)</option>
+<option value="message">Message Box (WhatsApp script type)</option>
+<option value="faq">FAQ (sawal jawab)</option>
+<option value="image">Image</option>
+<option value="cta">Last CTA Band</option>
+</select>
+<button class="btn alt" onclick="addBlock()">+ Block Jorein</button>
+</div>
+
+<div class="row" style="margin-top:22px">
+<button class="btn dark" onclick="previewPage()">Preview Dekhein</button>
+<button class="btn" id="pubBtn" onclick="publishPage()">Publish Karein</button>
+<button class="btn alt" onclick="resetEditor()">Naya Page (saaf karein)</button>
+</div>
+<div class="status" id="status"></div>
+</div>
+
+<div class="panel">
+<h2>Mere Banaye Hue Pages</h2>
+<p class="hint">Jo pages is panel se bane hain, wo yahan ayenge. Edit dabane se page editor mein khul jayega; dobara Publish karne se update ho jayega.</p>
+<div class="row"><button class="btn alt" onclick="loadMyPages()">List Load Karein</button></div>
+<div id="myPages"></div>
+</div>
+
+</div>
+<script>
+"use strict";
+/* ===== Site template (auto-filled from the live site files) ===== */
+const SITE_CSS = "\n:root{--dark:#080e0a;--green:#10b981;--paper:#f7f8f4;--ink:#15231b;--muted:#607167;--line:#dfe7df}\n*{box-sizing:border-box}html{scroll-behavior:smooth}\nbody{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif}\n.wrap{width:min(1120px,calc(100% - 32px));margin:auto}\na{text-decoration:none;color:inherit}\n.hero{background:var(--dark);color:#f8fafc;padding:70px 0 56px}\n.crumb{color:#8fae99;font-size:.8rem;margin-bottom:16px}.crumb a{color:#cfe3d6}\n.eyebrow{color:var(--green);font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}\n.hero h1{font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.08;margin:14px 0;max-width:820px}\n.hero p{max-width:680px;color:#a7b5ad;line-height:1.7;font-size:1.05rem}\n.sec{padding:56px 0}.sec.white{background:#fff}\n.sec h2{font-size:clamp(1.5rem,3.2vw,2.1rem);margin:10px 0 12px}\n.muted{color:var(--muted);line-height:1.7}\n.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:26px}\n.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px}\n.sec.white .card{background:var(--paper)}\n.card h3{margin:0 0 8px}.card p{margin:0;color:var(--muted);line-height:1.65}\n.dark{background:var(--dark);color:#f8fafc}\n.dark .muted{color:#a7b5ad}\n.dark .card{background:#112118;border-color:#294536}\n.dark .card p{color:#a7b5ad}\n.post{max-width:760px;margin:0 auto;padding:50px 0 6px}\n.post h2{font-size:1.55rem;margin:36px 0 12px;line-height:1.25}\n.post h2 .no{color:var(--green)}\n.post p{line-height:1.75;color:#2a3a30;margin:0 0 16px;font-size:1.02rem}\n.post a{color:#087f5b;font-weight:600;text-decoration:underline}\n.msg{background:#eefaf3;border:1px solid #bfe6cf;border-radius:14px;padding:20px 22px;margin:0 0 16px}\n.msg .tag{display:block;font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#087f5b;margin-bottom:8px}\n.msg p{margin:0;font-style:italic;color:#23402f;line-height:1.7}\n.say{background:#fff;border:1px dashed #9fb5a5;border-radius:14px;padding:20px 22px;margin:0 0 16px}\n.say p{margin:0;font-style:italic;line-height:1.7;color:#2a3a30}\n.faqs{margin-top:8px}\n.faqs details{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:10px}\n.faqs summary{font-weight:600;cursor:pointer}\n.faqs p{color:var(--muted);line-height:1.65;margin:10px 0 0;font-size:.98rem}\n.cta{background:var(--dark);color:#f8fafc;border-radius:16px;padding:46px 30px;text-align:center;margin:54px auto 70px}\n.cta h2{margin:0 0 10px}.cta p{color:#a7b5ad;margin:0 0 20px}\n.btn{display:inline-flex;padding:12px 18px;border-radius:9px;background:var(--green);color:#062016;font-weight:650}\n.next{max-width:760px;margin:0 auto 60px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px}\n.next h3{margin:0 0 6px}.next p{margin:0;color:var(--muted);line-height:1.65}\n@media(max-width:760px){.grid2{grid-template-columns:1fr}.hero{padding:52px 0 40px}.post{padding:38px 0 4px}.sec{padding:44px 0}}\n\n\n/* dd-hover: same card hover as the homepage */\n.card,.msg,.next{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}\n.card:hover,.msg:hover,.next:hover{transform:translateY(-5px);box-shadow:0 18px 40px rgba(2,44,30,.16);border-color:#10b981}\n.dark .card:hover{box-shadow:0 18px 40px rgba(0,0,0,.35);background:linear-gradient(160deg,rgba(16,185,129,.14),rgba(16,185,129,.03))}\n\n\n.uh-top{background:#07110b;color:#9eb5a5;font-size:12.5px;border-bottom:1px solid #1d2f24}\n.uh-topin{display:flex;justify-content:space-between;gap:14px;padding-top:7px;padding-bottom:7px;flex-wrap:wrap}\n.uh-top a{color:#cfe3d6;text-decoration:none;font-weight:600}.uh-topr{display:flex;gap:18px}\n.uh-head{background:#080e0a;border-bottom:1px solid #20372a;position:relative;z-index:30}\n.uh-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:76px}\n.uh-brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:650;text-decoration:none}\n.uh-brand img{height:48px;width:auto}\n.uh-brand small{display:block;color:#a7b5ad;font-size:10px;font-weight:600}\n.uh-links{display:none}\n@media(min-width:1024px){.uh-links{display:flex;gap:19px}.uh-hamb{display:none}}\n.uh-links a{color:#cfe3d6;font-size:13.5px;font-weight:600;text-decoration:none}.uh-links a:hover{color:#fff}\n.uh-actions{display:flex;gap:8px;align-items:center}\n.uh-btn{display:inline-flex;padding:10px 14px;border-radius:9px;font-weight:650;font-size:.8rem;text-decoration:none;white-space:nowrap}\n.uh-btno{background:transparent;color:#fff;border:1px solid #2b4234}\n.uh-btng{background:#10b981;color:#04150c}\n.uh-hamb{border:0;background:none;color:#fff;font-size:24px;cursor:pointer}\n.uh-menu{display:none;background:#0b2116;border-top:1px solid #20372a;padding:10px 18px}\n.uh-menu.open{display:block}\n.uh-menu a{display:block;padding:10px 0;color:#d4deea;font-weight:700;text-decoration:none}\nbody{font-weight:400;line-height:1.65}\np,li{line-height:1.65}\nh1{font-weight:700!important;letter-spacing:-.035em!important}\nh2{font-weight:650!important}\nh3,h4{font-weight:600!important}\nstrong,b{font-weight:600}\n.eyebrow{font-weight:700!important}\n.btn{font-weight:650!important}\n.price{font-weight:700!important}\n.stat b{font-weight:700}\n.uf{background:#080e0a;color:#c8d8ce;padding:48px 0 22px;border-top:1px solid #20372a}\n.uf-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:30px}\n.uf h4{color:#fff;margin:0 0 12px;font-size:.95rem}\n.uf a{display:block;margin:8px 0;color:#c8d8ce;font-size:.85rem;text-decoration:none}.uf a:hover{color:#fff}\n.uf p{color:#9eb5a5;font-size:.85rem;line-height:1.6}\n.uf-brand{display:flex;align-items:center;gap:10px;color:#fff;font-weight:650;margin:0 0 10px}\n.uf-brand img{height:48px;width:auto}\n.uf-brand small{display:block;color:#a7b5ad;font-size:10px;font-weight:600}\n.uf-type span{display:block;color:#9fb4a6;padding:3px 0;font-size:.8rem}\n.uf-copy{border-top:1px solid #263a2d;margin-top:28px;padding-top:18px;color:#9eb5a5;font-size:.75rem}\n@media(max-width:760px){.uf-grid{grid-template-columns:1fr 1fr;gap:24px 18px}.uf-grid>div:first-child,.uf-grid>div:last-child{grid-column:1/-1}.uh-nav{min-height:66px}}\n";
+const SITE_HEADER = "<div class=\"uh-top\"><div class=\"wrap uh-topin\"><span>Smart POS \u2022 Khata \u2022 Inventory \u2014 for retail shops everywhere</span><span class=\"uh-topr\"><a href=\"https://wa.me/923257633875\" target=\"_blank\" rel=\"noopener\">WhatsApp: +92 325 7633875</a><a href=\"mailto:dokanretailkhata@gmail.com\">dokanretailkhata@gmail.com</a></span></div></div>\n<header class=\"uh-head\"><div class=\"wrap uh-nav\"><a class=\"uh-brand\" href=\"./index.html\"><img src=\"./digital-dokan-logo-dark.png\" alt=\"Digital Dokan\"></a><nav class=\"uh-links\"><a href=\"./index.html\">Home</a><a href=\"./features.html\">Features</a><a href=\"./pricing.html\">Pricing</a><a href=\"./compare.html\">Compare</a><a href=\"./blog.html\">Blog</a><a href=\"./about.html\">About</a><a href=\"./contact.html\">Contact</a></nav><div class=\"uh-actions\"><a class=\"uh-btn uh-btno\" href=\"./mydokan2.html\">Log In</a><a class=\"uh-btn uh-btng\" href=\"./mydokan2.html\">Start Free Trial</a><button class=\"uh-hamb\" aria-label=\"Open menu\" onclick=\"uhToggle()\">\u2630</button></div></div><div class=\"uh-menu\" id=\"uhMenu\"><a href=\"./index.html\">Home</a><a href=\"./features.html\">Features</a><a href=\"./pricing.html\">Pricing</a><a href=\"./compare.html\">Compare</a><a href=\"./blog.html\">Blog</a><a href=\"./about.html\">About Us</a><a href=\"./contact.html\">Contact Us</a><a href=\"./mydokan2.html\">Log In</a></div></header>";
+const SITE_FOOTER = "<footer class=\"uf\"><div class=\"wrap\"><div class=\"uf-grid\"><div><a class=\"uf-brand\" href=\"./index.html\"><img src=\"./digital-dokan-logo-dark.png\" alt=\"Digital Dokan\"></a><p>Simple retail software for modern businesses \u2014 POS billing, udhaar khata, stock and profit reports in one app.</p><a href=\"https://wa.me/923257633875\" target=\"_blank\" rel=\"noopener\">WhatsApp Support</a><a href=\"mailto:dokanretailkhata@gmail.com\">Email Us</a></div><div><h4>Quick Links</h4><a href=\"./index.html\">Home</a><a href=\"./features.html\">Features</a><a href=\"./pricing.html\">Pricing</a><a href=\"./compare.html\">Compare</a><a href=\"./blog.html\">Blog</a><a href=\"./mydokan2.html\">Login</a><a href=\"./mydokan2.html\">Open App</a></div><div><h4>Shop Types We Serve</h4><div class=\"uf-type\"><span>Kiryana &amp; General Stores</span><span>Pharmacies &amp; Medical Stores</span><span>Garments &amp; Fashion Shops</span><span>Mobile &amp; Accessories Shops</span><span>Bakeries &amp; Sweet Shops</span><span>Wholesale &amp; Distribution</span></div></div><div><h4>Contact</h4><a href=\"mailto:dokanretailkhata@gmail.com\">dokanretailkhata@gmail.com</a><a href=\"https://wa.me/923257633875\" target=\"_blank\" rel=\"noopener\">WhatsApp: +92 325 7633875</a><a href=\"./privacy.html\">Privacy Policy</a><a href=\"./terms.html\">Terms of Use</a></div></div><div class=\"uf-copy\">Copyright 2026 Digital Dokan. All rights reserved.</div></div></footer>";
+const SITE_TOGGLE = "<scr" + "ipt>function uhToggle(){document.getElementById('uhMenu').classList.toggle('open')}</scr" + "ipt>";
+const REPO = "digitaldokanapp/digital-dokan";
+const BASE = "https://digitaldokanapp.github.io/digital-dokan/";
+const SKIP = ["index.html","features.html","pricing.html","compare.html","blog.html","about.html","contact.html","privacy.html","terms.html","admin.html","mydokan2.html","khata.html","website-builder.html"];
+
+/* ===== Helpers ===== */
+const $ = id => document.getElementById(id);
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function escA(s){return esc(s).replace(/"/g,"&quot;")}
+function fmt(s){
+  let t = esc(s);
+  t = t.replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  t = t.replace(/\[([^\]]+)\]\(([A-Za-z0-9./#?=&%:_-]+)\)/g, '<a href="$2">$1</a>');
+  return t;
+}
+function paras(s){return String(s||"").split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(p=>"<p>"+fmt(p).replace(/\n/g,"<br>")+"</p>").join("\n")}
+function slugify(s){return String(s||"").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function b64enc(str){return btoa(unescape(encodeURIComponent(str)))}
+function b64dec(b64){return decodeURIComponent(escape(atob(String(b64).replace(/\s/g,""))))}
+function setStatus(msg, err){
+  const s = $("status"); s.style.display = "block"; s.className = "status" + (err ? " err" : "");
+  s.innerHTML = msg;
+}
+
+/* ===== GitHub API ===== */
+function ghKey(){return localStorage.getItem("ddgh") || ""}
+async function gh(path, method, body){
+  const r = await fetch("https://api.github.com/repos/" + REPO + "/contents/" + path, {
+    method: method || "GET",
+    headers: {"Authorization": "Bearer " + ghKey(), "Accept": "application/vnd.github+json", "Content-Type": "application/json"},
+    body: body ? JSON.stringify(body) : undefined
+  });
+  if (r.status === 404) return null;
+  const j = await r.json().catch(()=>({}));
+  if (!r.ok) throw new Error(j.message || ("GitHub error " + r.status));
+  return j;
+}
+async function ghGetFile(path){
+  const j = await gh(path);
+  if (!j) return null;
+  return {sha: j.sha, text: b64dec(j.content)};
+}
+async function ghPutFile(path, text, msg, sha){
+  const body = {message: msg, content: b64enc(text), branch: "main"};
+  if (sha) body.sha = sha;
+  return gh(path, "PUT", body);
+}
+async function ghPutRaw(path, base64Content, msg, sha){
+  const body = {message: msg, content: base64Content, branch: "main"};
+  if (sha) body.sha = sha;
+  return gh(path, "PUT", body);
+}
+function saveKey(){
+  const v = $("ghKey").value.trim();
+  if (!v) { $("keyState").textContent = "Pehle key likhein."; return; }
+  localStorage.setItem("ddgh", v);
+  $("keyState").textContent = "Key save ho gayi is browser mein. Ab page bana kar Publish karein.";
+}
+
+/* ===== Editor state ===== */
+let blocks = [];
+let editingSlug = "";
+const BLOCK_NAMES = {text:"Text Section", steps:"Numbered Steps", cards:"Cards", message:"Message Box", faq:"FAQ", image:"Image", cta:"CTA Band"};
+function blankBlock(type){
+  switch(type){
+    case "text": return {type, heading:"", body:""};
+    case "steps": return {type, heading:"", items:[{h:"", t:""}]};
+    case "cards": return {type, heading:"", intro:"", dark:false, items:[{h:"", t:""},{h:"", t:""}]};
+    case "message": return {type, label:"", text:""};
+    case "faq": return {type, heading:"Common Questions", items:[{q:"", a:""}]};
+    case "image": return {type, src:"", alt:"", caption:"", uploadName:""};
+    case "cta": return {type, heading:"", text:"", btn:"Start Free Trial", link:"./mydokan2.html"};
+  }
+}
+function field(label, val, ph, cls){
+  return '<label>' + label + '</label><input type="text" data-f="' + cls + '" value="' + escA(val) + '" placeholder="' + escA(ph||"") + '">';
+}
+function area(label, val, ph, cls, tall){
+  return '<label>' + label + '</label><textarea data-f="' + cls + '"' + (tall ? ' class="tall"' : '') + ' placeholder="' + escA(ph||"") + '">' + esc(val) + '</textarea>';
+}
+function blockForm(b, i){
+  let h = "";
+  if (b.type === "text"){
+    h += field("Section ki heading (khali bhi ho sakti hai)", b.heading, "Misal: Why Udhaar Gets Stuck", "heading");
+    h += area("Text — khali line se naya paragraph", b.body, "Yahan apna text likhein...", "body", true);
+  } else if (b.type === "steps"){
+    h += field("Section ki heading", b.heading, "Misal: 7 Ways That Work", "heading");
+    b.items.forEach((it, j) => {
+      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Step " + (j+1) + " ki heading", it.h, "", "items." + j + ".h") + area("Step " + (j+1) + " ka text", it.t, "", "items." + j + ".t") + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye step hatayein</button></div>';
+    });
+    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Step jorein</button></div>';
+  } else if (b.type === "cards"){
+    h += field("Section ki heading", b.heading, "Misal: What Digital Dokan Does", "heading");
+    h += area("Chhota intro (khali bhi ho sakta hai)", b.intro, "", "intro");
+    h += '<label><input type="checkbox" data-f="dark" ' + (b.dark ? "checked" : "") + ' style="width:auto"> Dark (gehra rang) wala section</label>';
+    b.items.forEach((it, j) => {
+      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Card " + (j+1) + " ka title", it.h, "", "items." + j + ".h") + area("Card " + (j+1) + " ka text", it.t, "", "items." + j + ".t") + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye card hatayein</button></div>';
+    });
+    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Card jorein</button></div>';
+  } else if (b.type === "message"){
+    h += field("Chhota label (box ke upar)", b.label, "Misal: A soft reminder before the date", "label");
+    h += area("Message ka text", b.text, "Assalam-o-Alaikum, ...", "text", true);
+  } else if (b.type === "faq"){
+    h += field("Section ki heading", b.heading, "Common Questions", "heading");
+    b.items.forEach((it, j) => {
+      h += '<div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:4px">' + field("Sawal " + (j+1), it.q, "", "items." + j + ".q") + area("Jawab " + (j+1), it.a, "", "items." + j + ".a") + '<button class="iconbtn" onclick="delItem(' + i + ',' + j + ')">ye sawal hatayein</button></div>';
+    });
+    h += '<div style="margin-top:10px"><button class="iconbtn" onclick="addItem(' + i + ')">+ Sawal jorein</button></div>';
+  } else if (b.type === "image"){
+    h += '<label>Tasveer — website ki mojooda tasveeron se chunein</label><select data-f="src"><option value="">— chunein —</option>' +
+      ["./home-khata.jpg","./dashboard-hero-attached.png","./quick-billing-attached.png","./business-reports-attached.png","./sales-invoices-latest.png"].map(s => '<option value="' + s + '"' + (b.src === s ? " selected" : "") + '>' + s.replace("./","") + '</option>').join("") + '</select>';
+    h += '<label>Ya apni tasveer upload karein (JPG/PNG, 1.5MB se chhoti)</label><input type="file" accept="image/*" onchange="pickUpload(' + i + ', this)"><div class="count" id="upNote' + i + '">' + (b.uploadName ? ("Upload tayyar: " + esc(b.uploadName)) : "") + '</div>';
+    h += field("Tasveer ki alt text (SEO ke liye)", b.alt, "Tasveer mein kya hai, ek jumla", "alt");
+    h += field("Neeche caption (khali bhi ho sakta hai)", b.caption, "", "caption");
+  } else if (b.type === "cta"){
+    h += field("CTA heading", b.heading, "Misal: Start Your Free Trial Today", "heading");
+    h += area("CTA text", b.text, "", "text");
+    h += field("Button ka text", b.btn, "Start Free Trial", "btn");
+    h += field("Button ka link", b.link, "./mydokan2.html ya https://...", "link");
+  }
+  return h;
+}
+function renderBlocks(){
+  $("blocks").innerHTML = blocks.map((b, i) =>
+    '<div class="block"><div class="block-head"><b>' + (i+1) + ". " + BLOCK_NAMES[b.type] + '</b><span class="row">' +
+    '<button class="iconbtn" onclick="moveBlock(' + i + ',-1)">↑ Upar</button>' +
+    '<button class="iconbtn" onclick="moveBlock(' + i + ',1)">↓ Neeche</button>' +
+    '<button class="iconbtn" onclick="removeBlock(' + i + ')">✕ Hatayein</button></span></div>' +
+    '<div data-block="' + i + '">' + blockForm(b, i) + '</div></div>'
+  ).join("");
+}
+function readBlocks(){
+  document.querySelectorAll("[data-block]").forEach(wrap => {
+    const i = +wrap.getAttribute("data-block"), b = blocks[i];
+    wrap.querySelectorAll("[data-f]").forEach(el => {
+      const path = el.getAttribute("data-f").split(".");
+      let target = b;
+      for (let k = 0; k < path.length - 1; k++) target = target[path[k]];
+      const last = path[path.length - 1];
+      target[last] = el.type === "checkbox" ? el.checked : el.value;
+    });
+  });
+}
+function addBlock(){ readBlocks(); blocks.push(blankBlock($("newBlockType").value)); renderBlocks(); }
+function removeBlock(i){ readBlocks(); blocks.splice(i, 1); renderBlocks(); }
+function moveBlock(i, dir){ readBlocks(); const j = i + dir; if (j < 0 || j >= blocks.length) return; const t = blocks[i]; blocks[i] = blocks[j]; blocks[j] = t; renderBlocks(); }
+function addItem(i){ readBlocks(); const b = blocks[i]; if (b.type === "faq") b.items.push({q:"", a:""}); else b.items.push({h:"", t:""}); renderBlocks(); }
+function delItem(i, j){ readBlocks(); blocks[i].items.splice(j, 1); renderBlocks(); }
+const uploadStore = {};
+function pickUpload(i, input){
+  const f = input.files && input.files[0]; if (!f) return;
+  if (f.size > 1572864) { alert("Tasveer 1.5MB se bari hai — pehle chhoti/compress karke layein."); input.value = ""; return; }
+  const rd = new FileReader();
+  rd.onload = () => { uploadStore[i] = {name: f.name.toLowerCase().replace(/[^a-z0-9.]+/g,"-"), dataUrl: rd.result}; $("upNote" + i).textContent = "Upload tayyar: " + f.name; };
+  rd.readAsDataURL(f);
+}
+</script>
+<script>
+"use strict";
+/* ===== Page data ===== */
+function collectPage(){
+  readBlocks();
+  return {
+    type: $("pType").value,
+    slug: slugify($("pSlug").value || $("pTitle").value),
+    title: $("pTitle").value.trim(),
+    desc: $("pDesc").value.trim(),
+    eyebrow: $("pEyebrow").value.trim(),
+    h1: $("pH1").value.trim(),
+    intro: $("pIntro").value.trim(),
+    cardText: $("pCardText").value.trim(),
+    cardImg: $("pCardImg").value,
+    blocks: JSON.parse(JSON.stringify(blocks))
+  };
+}
+function fillEditor(p){
+  $("pType").value = p.type; $("pSlug").value = p.slug; $("pTitle").value = p.title || "";
+  $("pDesc").value = p.desc || ""; $("pEyebrow").value = p.eyebrow || ""; $("pH1").value = p.h1 || "";
+  $("pIntro").value = p.intro || ""; $("pCardText").value = p.cardText || "";
+  if (p.cardImg) $("pCardImg").value = p.cardImg;
+  blocks = JSON.parse(JSON.stringify(p.blocks || []));
+  editingSlug = p.slug;
+  toggleBlogFields(); renderBlocks(); countAll();
+  window.scrollTo({top: 0, behavior: "smooth"});
+}
+function resetEditor(){
+  ["pSlug","pTitle","pDesc","pEyebrow","pH1","pIntro","pCardText"].forEach(id => $(id).value = "");
+  blocks = []; editingSlug = ""; renderBlocks(); countAll();
+}
+function toggleBlogFields(){ $("blogFields").style.display = $("pType").value === "blog" ? "block" : "none"; }
+
+/* ===== Templates ===== */
+function pickTpl(name){
+  document.querySelectorAll("#tplRow button").forEach(b => b.classList.toggle("sel", b.getAttribute("data-tpl") === name));
+  let bs = [];
+  if (name === "blog"){
+    $("pType").value = "blog";
+    bs = [blankBlock("text"), blankBlock("steps"), blankBlock("message"), blankBlock("faq"), blankBlock("cta")];
+  } else if (name === "guide"){
+    $("pType").value = "page";
+    bs = [blankBlock("cards"), blankBlock("steps"), blankBlock("faq"), blankBlock("cta")];
+  } else if (name === "info"){
+    $("pType").value = "page";
+    bs = [blankBlock("cards"), blankBlock("text"), blankBlock("faq"), blankBlock("cta")];
+  } else {
+    $("pType").value = "page";
+    bs = [blankBlock("text")];
+  }
+  blocks = bs; editingSlug = ""; toggleBlogFields(); renderBlocks();
+}
+
+/* ===== Generator: blocks -> page HTML (site design) ===== */
+function blockHTML(b){
+  if (b.type === "text"){
+    return '<section class="post wrap">' + (b.heading ? "<h2>" + esc(b.heading) + "</h2>" : "") + paras(b.body) + "</section>";
+  }
+  if (b.type === "steps"){
+    const items = (b.items || []).filter(x => x.h.trim() || x.t.trim());
+    return '<section class="post wrap">' + (b.heading ? "<h2>" + esc(b.heading) + "</h2>" : "") +
+      items.map((it, j) => "<h2><span class=\"no\">" + (j+1) + ".</span> " + esc(it.h) + "</h2>" + paras(it.t)).join("\n") + "</section>";
+  }
+  if (b.type === "cards"){
+    const items = (b.items || []).filter(x => x.h.trim() || x.t.trim());
+    return '<section class="sec' + (b.dark ? " dark" : "") + '"><div class="wrap">' +
+      (b.heading ? '<span class="eyebrow">Overview</span><h2>' + esc(b.heading) + "</h2>" : "") +
+      (b.intro ? '<p class="muted">' + fmt(b.intro) + "</p>" : "") +
+      '<div class="grid2">' + items.map(it => '<div class="card"><h3>' + esc(it.h) + "</h3><p>" + fmt(it.t) + "</p></div>").join("") + "</div></div></section>";
+  }
+  if (b.type === "message"){
+    return '<section class="post wrap"><div class="msg">' + (b.label ? '<span class="tag">' + esc(b.label) + "</span>" : "") + "<p>" + fmt(b.text).replace(/\n/g,"<br>") + "</p></div></section>";
+  }
+  if (b.type === "faq"){
+    const items = (b.items || []).filter(x => x.q.trim());
+    return '<section class="sec"><div class="wrap"><h2>' + esc(b.heading || "Common Questions") + '</h2><div class="faqs">' +
+      items.map(it => "<details><summary>" + esc(it.q) + "</summary><p>" + fmt(it.a) + "</p></details>").join("") + "</div></div></section>";
+  }
+  if (b.type === "image"){
+    if (!b.src) return "";
+    return '<section class="post wrap"><figure style="margin:0"><img src="' + escA(b.src) + '" alt="' + escA(b.alt) + '" style="width:100%;border-radius:14px">' +
+      (b.caption ? '<figcaption class="muted" style="margin-top:8px">' + esc(b.caption) + "</figcaption>" : "") + "</figure></section>";
+  }
+  if (b.type === "cta"){
+    return '<section class="wrap"><div class="cta"><h2>' + esc(b.heading) + '</h2><p>' + fmt(b.text) + '</p><a class="btn" href="' + escA(b.link || "./mydokan2.html") + '">' + esc(b.btn || "Start Free Trial") + "</a></div></section>";
+  }
+  return "";
+}
+function faqSchema(p){
+  const qs = [];
+  (p.blocks || []).forEach(b => { if (b.type === "faq") (b.items || []).forEach(it => { if (it.q.trim()) qs.push({"@type":"Question","name":it.q.trim(),"acceptedAnswer":{"@type":"Answer","text":String(it.a||"").replace(/\*\*/g,"").trim()}}); }); });
+  if (!qs.length) return "";
+  return '<script type="application/ld+json">' + JSON.stringify({"@context":"https://schema.org","@type":"FAQPage","mainEntity":qs}) + "</" + "script>";
+}
+function blogSchema(p, url){
+  return '<script type="application/ld+json">' + JSON.stringify({"@context":"https://schema.org","@type":"BlogPosting","headline":p.h1 || p.title,"description":p.desc,"datePublished":today(),"dateModified":today(),"author":{"@type":"Organization","name":"Digital Dokan"},"publisher":{"@type":"Organization","name":"Digital Dokan"},"mainEntityOfPage":url}) + "</" + "script>";
+}
+function buildPageHTML(p){
+  const url = BASE + p.slug + ".html";
+  const hero = '<section class="hero"><div class="wrap">' +
+    (p.type === "blog" ? '<div class="crumb"><a href="./index.html">Home</a> / <a href="./blog.html">Blog</a> / ' + esc(p.h1 || p.title) + "</div>" : "") +
+    (p.eyebrow ? '<span class="eyebrow">' + esc(p.eyebrow) + "</span>" : "") +
+    "<h1>" + esc(p.h1 || p.title) + "</h1>" + (p.intro ? "<p>" + fmt(p.intro) + "</p>" : "") + "</div></section>";
+  const body = hero + "\n" + (p.blocks || []).map(blockHTML).join("\n");
+  const schemas = (p.type === "blog" ? blogSchema(p, url) : "") + faqSchema(p);
+  return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n" +
+    "<title>" + esc(p.title) + "</title>\n<meta name=\"description\" content=\"" + escA(p.desc) + "\">\n" +
+    '<link rel="canonical" href="' + url + '">\n' +
+    '<link rel="icon" type="image/webp" href="./digital-dokan-icon.webp">\n<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png">\n<link rel="apple-touch-icon" sizes="180x180" href="./favicon-180.png">\n' +
+    '<meta property="og:type" content="' + (p.type === "blog" ? "article" : "website") + '">\n<meta property="og:site_name" content="Digital Dokan">\n<meta property="og:title" content="' + escA(p.title) + '">\n<meta property="og:description" content="' + escA(p.desc) + '">\n<meta property="og:url" content="' + url + '">\n<meta property="og:image" content="' + BASE + 'og-cover.jpg">\n' +
+    schemas + "\n<style>" + SITE_CSS + "</style>\n</head>\n<body>\n" + SITE_HEADER + "\n" + SITE_TOGGLE + "\n<main>\n" + body + "\n</main>\n" + SITE_FOOTER + "\n<!--DD-CMS:" + b64enc(JSON.stringify(p)) + "-->\n</body>\n</html>";
+}
+function blogCardHTML(p){
+  return '<a class="card post-card" href="./' + p.slug + '.html"><img class="thumb" src="' + escA(p.cardImg || "./home-khata.jpg") + '" alt="' + escA(p.h1 || p.title) + '"><h2>' + esc(p.h1 || p.title) + "</h2><p>" + esc(p.cardText || p.desc) + '</p><span style="color:#087f5b;font-weight:600">Read the guide →</span></a>';
+}
+
+/* ===== Preview / Publish ===== */
+function previewPage(){
+  const p = collectPage();
+  if (!p.title) { alert("Pehle SEO Title likhein."); return; }
+  const blob = new Blob([buildPageHTML(p)], {type: "text/html"});
+  window.open(URL.createObjectURL(blob), "_blank");
+}
+async function publishPage(){
+  const p = collectPage();
+  if (!ghKey()) { setStatus("Pehle Step 1 mein GitHub key save karein.", true); return; }
+  if (!p.slug) { setStatus("Page ka title likhein — address (slug) usi se banta hai.", true); return; }
+  if (!p.title || !p.h1) { setStatus("SEO Title aur Bari Heading (H1) lazmi hain.", true); return; }
+  const btn = $("pubBtn"); btn.disabled = true;
+  try {
+    setStatus("Publish ho raha hai — pehle tasveerein, phir page...");
+    /* uploaded images first */
+    for (let i = 0; i < p.blocks.length; i++){
+      const b = p.blocks[i];
+      if (b.type === "image" && uploadStore[i]){
+        const up = uploadStore[i];
+        const fname = "img-" + p.slug + "-" + up.name;
+        const existing = await ghGetFile(fname);
+        await ghPutRaw(fname, up.dataUrl.split(",")[1], "Panel image: " + fname, existing ? existing.sha : undefined);
+        b.src = "./" + fname; b.uploadName = up.name;
+      }
+    }
+    const html = buildPageHTML(p);
+    const path = p.slug + ".html";
+    const existing = await ghGetFile(path);
+    await ghPutFile(path, html, (existing ? "Update page: " : "New page: ") + p.slug, existing ? existing.sha : undefined);
+    if (p.type === "blog"){
+      const blog = await ghGetFile("blog.html");
+      if (blog && blog.text.includes("<!--DD-CARDS-->")){
+        let t = blog.text;
+        const cardOld = new RegExp('<a class="card post-card" href="./' + p.slug + '\\.html">[\\s\\S]*?</a>');
+        t = t.replace(cardOld, "");
+        t = t.replace("<!--DD-CARDS-->", "<!--DD-CARDS-->\n" + blogCardHTML(p));
+        await ghPutFile("blog.html", t, "Blog card: " + p.slug, blog.sha);
+      }
+    }
+    editingSlug = p.slug;
+    setStatus("✅ <b>Publish ho gaya!</b> Page 1–2 minute mein live hoga: <a href=\"" + BASE + path + "\" target=\"_blank\" rel=\"noopener\">" + BASE + path + "</a><br>Sitemap khud update ho jayega. Google par anay mein kuch din lag sakte hain — chahein to Search Console se Request Indexing kar dein.");
+  } catch (e) {
+    setStatus("❌ Publish nahi hua: " + esc(e.message) + "<br>Agar key ka error hai to Step 1 mein key dobara check karein (Contents: Read and write wali permission lazmi hai).", true);
+  }
+  btn.disabled = false;
+}
+
+/* ===== My pages ===== */
+async function loadMyPages(){
+  const box = $("myPages");
+  if (!ghKey()) { box.innerHTML = '<p class="hint">Pehle Step 1 mein key save karein.</p>'; return; }
+  box.innerHTML = '<p class="hint">Load ho raha hai...</p>';
+  try {
+    const list = await gh("");
+    const files = (list || []).filter(x => x.type === "file" && x.name.endsWith(".html") && !SKIP.includes(x.name));
+    const mine = [];
+    for (const f of files){
+      const got = await ghGetFile(f.name);
+      if (got && got.text.includes("<!--DD-CMS:")){
+        const m = got.text.match(/<!--DD-CMS:([A-Za-z0-9+/=]+)-->/);
+        if (m) { try { mine.push(JSON.parse(b64dec(m[1]))); } catch(e){} }
+      }
+    }
+    if (!mine.length) { box.innerHTML = '<p class="hint">Abhi is panel se koi page nahi bana.</p>'; return; }
+    box.innerHTML = mine.map(p =>
+      '<div class="pageitem"><div><b>' + esc(p.h1 || p.title) + '</b><br><small>' + esc(p.slug) + ".html · " + (p.type === "blog" ? "Blog Post" : "Page") + '</small></div>' +
+      '<span class="row"><a class="btn alt sm" href="' + BASE + p.slug + '.html" target="_blank" rel="noopener">Kholein</a>' +
+      '<button class="btn dark sm" onclick="editPage(\'' + p.slug + '\')">Edit</button>' +
+      '<button class="btn red sm" onclick="deletePage(\'' + p.slug + '\')">Delete</button></span></div>'
+    ).join("");
+    window._myPages = mine;
+  } catch (e) {
+    box.innerHTML = '<p class="hint">List nahi ayi: ' + esc(e.message) + "</p>";
+  }
+}
+function editPage(slug){
+  const p = (window._myPages || []).find(x => x.slug === slug);
+  if (p) fillEditor(p);
+}
+async function deletePage(slug){
+  if (!confirm("Pakka delete karein? " + slug + ".html website se hat jayega.")) return;
+  try {
+    const f = await ghGetFile(slug + ".html");
+    if (f) await gh(slug + ".html", "DELETE", {message: "Delete page: " + slug, sha: f.sha, branch: "main"});
+    const blog = await ghGetFile("blog.html");
+    if (blog && blog.text.includes('href="./' + slug + '.html"')){
+      const t = blog.text.replace(new RegExp('<a class="card post-card" href="./' + slug + '\\.html">[\\s\\S]*?</a>\\n?'), "");
+      if (t !== blog.text) await ghPutFile("blog.html", t, "Remove blog card: " + slug, blog.sha);
+    }
+    setStatus("Page delete ho gaya: " + slug + ".html");
+    loadMyPages();
+  } catch (e) { setStatus("Delete nahi hua: " + esc(e.message), true); }
+}
+
+/* ===== Counters + init ===== */
+function countAll(){
+  $("cTitle").textContent = $("pTitle").value.length + " / 50 haroof (behtar)";
+  $("cDesc").textContent = $("pDesc").value.length + " / 150 haroof (behtar)";
+}
+["pTitle","pDesc"].forEach(id => $(id).addEventListener("input", countAll));
+$("pType").addEventListener("change", toggleBlogFields);
+$("pTitle").addEventListener("input", () => { if (!editingSlug) $("pSlug").value = slugify($("pTitle").value); });
+if (ghKey()) { $("ghKey").value = ghKey(); $("keyState").textContent = "Key is browser mein pehle se save hai."; }
+pickTpl("blog");
+</script>
+</body>
+</html>
