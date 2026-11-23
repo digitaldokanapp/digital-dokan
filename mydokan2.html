@@ -6525,7 +6525,7 @@
             function ddCloudEnabled(){return !!(window.DD_FIREBASE_CONFIG && window.DD_FIREBASE_CONFIG.projectId)}
             function ddAuthMsg(text,isErr){const m=document.getElementById('ddAuthMsg');if(m){m.style.color=isErr?'#dc2626':'#059669';m.innerHTML=text}const e=document.getElementById('ddLoginError');if(e&&isErr)e.textContent='';if(e&&!isErr)e.textContent=''}
             function ddNotEnabledMsg(){ddAuthMsg('Cloud accounts are not enabled yet. To get your account today, please <a href="https://wa.me/923257633875" target="_blank" rel="noopener">Book a Demo on WhatsApp</a> and our team will set up your shop.',true)}
-            function ddShowSignup(){if(!ddCloudEnabled()){ddNotEnabledMsg();return}document.getElementById('ddSignupFields').style.display='block';ddAuthMsg('Create your shop account. We will email you a verification link.',false)}
+            function ddShowSignup(){if(!ddCloudEnabled()){ddNotEnabledMsg();return}document.getElementById('ddSignupFields').style.display='block';ddAuthMsg('Fill in your details below to create your shop account. After your account is created, we will email you a verification link.',false)}
             function ddShowLogin(){document.getElementById('ddSignupFields').style.display='none';ddAuthMsg('',false)}
             async function ddEnsureFB(){if(!ddCloudEnabled())return false;const ok=await ddFirebaseInit();return !!(ok&&window.DD_FB&&window.DD_FB.auth)}
             /* DD-FIX: resolve the signed-in user's shopId + role from users/{uid} BEFORE any shop data loads.
