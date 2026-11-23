@@ -12,7 +12,7 @@ import subprocess
 import sys
 from datetime import date
 
-BASE = "https://digitaldokanapp.github.io/digital-dokan/"
+BASE = "https://digitaldokanapp.com/"
 
 # Known pages, in sitemap order: filename -> (changefreq, priority)
 KNOWN = [
